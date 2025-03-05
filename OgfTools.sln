@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OGF tool", "OGF tool\OGF tool.csproj", "{02F33C82-43EE-4A2D-962A-74C3CA6A4FBC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OgfTool", "OgfTool\OgfTool.csproj", "{02F33C82-43EE-4A2D-962A-74C3CA6A4FBC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Converter", "Tools\Converter\project\Converter.vcxproj", "{251A6DE4-30F3-43A4-8315-AB4E306BD58D}"
 EndProject
@@ -29,7 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{CF6C1E23
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{7F47EEB3-2988-471A-B903-ECCD97F65ABF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubUpdate", "OGF Tool\GitHubUpdate\GitHubUpdate.csproj", "{D3121CDD-5BBD-4EF9-A268-8F2C0FDB900A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubUpdate", "OgfTool\GitHubUpdate\GitHubUpdate.csproj", "{D3121CDD-5BBD-4EF9-A268-8F2C0FDB900A}"
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "TextToPng", "Tools\TextToPng\TextToPng.pyproj", "{0A36C459-957B-4890-B393-4993798055C9}"
 EndProject

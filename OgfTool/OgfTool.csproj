@@ -1,0 +1,278 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{02F33C82-43EE-4A2D-962A-74C3CA6A4FBC}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>OgfTool</RootNamespace>
+    <AssemblyName>OgfTool</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Bin\Win32\Debug\</OutputPath>
+    <IntermediateOutputPath>..\Intermediate\Win32\Debug\OGF Tool</IntermediateOutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\Bin\Win32\Release\</OutputPath>
+    <IntermediateOutputPath>..\Intermediate\Win32\Release\OGF Tool</IntermediateOutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\Bin\x64\Debug\</OutputPath>
+    <IntermediateOutputPath>..\Intermediate\x64\Debug\OGF Tool</IntermediateOutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>..\Bin\x64\Release\</OutputPath>
+    <IntermediateOutputPath>..\Intermediate\x64\Release\OGF Tool</IntermediateOutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Ogf_Editor.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Aspose.3D, Version=23.7.0.0, Culture=neutral, PublicKeyToken=f071c641d0b4582b, processorArchitecture=MSIL">
+      <HintPath>..\packages\Aspose.3D.23.7.0\lib\net46\Aspose.3D.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Classes\BitMask.cs" />
+    <Compile Include="Classes\BoundingMesh.cs" />
+    <Compile Include="Classes\Copy.cs" />
+    <Compile Include="Classes\FVec.cs" />
+    <Compile Include="Classes\FVec2.cs" />
+    <Compile Include="Classes\OGF Chunks\Header.cs" />
+    <Compile Include="Forms\AddMesh.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\AddMesh.Designer.cs">
+      <DependentUpon>AddMesh.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Classes\AutoClosingMessageBox.cs" />
+    <Compile Include="Classes\EditorSettings.cs" />
+    <Compile Include="Classes\FolderSelectDialog.cs" />
+    <Compile Include="Forms\Batch\Batch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Batch\Batch.Designer.cs">
+      <DependentUpon>Batch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Batch\AddDeleteData.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Batch\AddDeleteData.Designer.cs">
+      <DependentUpon>AddDeleteData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Batch\ReplaceData.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Batch\ReplaceData.Designer.cs">
+      <DependentUpon>ReplaceData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\DmData.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\DmData.Designer.cs">
+      <DependentUpon>DmData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ImportParams.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ImportParams.Designer.cs">
+      <DependentUpon>ImportParams.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Classes\IniFile.cs" />
+    <Compile Include="Classes\OGF Chunks\OMF.cs" />
+    <Compile Include="Forms\MoveMesh.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MoveMesh.Designer.cs">
+      <DependentUpon>MoveMesh.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Editor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Editor.Designer.cs">
+      <DependentUpon>Editor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Classes\Model.cs" />
+    <Compile Include="Forms\OgfInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\OgfInfo.Designer.cs">
+      <DependentUpon>OgfInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Classes\OGF Chunks\BoneData.cs" />
+    <Compile Include="Classes\OGF Chunks\Children.cs" />
+    <Compile Include="Classes\OGF Chunks\Description.cs" />
+    <Compile Include="Classes\OGF Chunks\IKData.cs" />
+    <Compile Include="Classes\OGF Chunks\Lod.cs" />
+    <Compile Include="Classes\OGF Chunks\MotionRefs.cs" />
+    <Compile Include="Classes\OGF Chunks\UserData.cs" />
+    <Compile Include="Forms\SaveObj.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SaveObj.Designer.cs">
+      <DependentUpon>SaveObj.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SelectMeshes.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SelectMeshes.Designer.cs">
+      <DependentUpon>SelectMeshes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Classes\Resources.cs" />
+    <Compile Include="Forms\Settings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings.designer.cs">
+      <DependentUpon>Settings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>strings.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SwiLod.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SwiLod.Designer.cs">
+      <DependentUpon>SwiLod.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Classes\XRayLoader.cs" />
+    <EmbeddedResource Include="Forms\AddMesh.resx">
+      <DependentUpon>AddMesh.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Batch\Batch.resx">
+      <DependentUpon>Batch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Batch\AddDeleteData.resx">
+      <DependentUpon>AddDeleteData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Batch\ReplaceData.resx">
+      <DependentUpon>ReplaceData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\DmData.resx">
+      <DependentUpon>DmData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ImportParams.resx">
+      <DependentUpon>ImportParams.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MoveMesh.resx">
+      <DependentUpon>MoveMesh.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Editor.resx">
+      <DependentUpon>Editor.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Editor.ru.resx">
+      <DependentUpon>Editor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\OgfInfo.resx">
+      <DependentUpon>OgfInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\OgfInfo.ru.resx">
+      <DependentUpon>OgfInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SaveObj.resx">
+      <DependentUpon>SaveObj.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SelectMeshes.resx">
+      <DependentUpon>SelectMeshes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="Forms\Settings.resx">
+      <DependentUpon>Settings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings.ru.resx">
+      <DependentUpon>Settings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="strings.ru.resx" />
+    <EmbeddedResource Include="Forms\SwiLod.resx">
+      <DependentUpon>SwiLod.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Ogf_Editor.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="GitHubUpdate\GitHubUpdate.csproj">
+      <Project>{d3121cdd-5bbd-4ef9-a268-8f2c0fdb900a}</Project>
+      <Name>GitHubUpdate</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /y /d  "$(SolutionDir)SDK\binaries\f3d.exe" "$(OutDir)..\..\..\$(Configuration)"
+xcopy /y /d  "$(SolutionDir)SDK\binaries\TextToPng.exe" "$(OutDir)..\..\..\$(Configuration)"</PostBuildEvent>
+  </PropertyGroup>
+</Project>
