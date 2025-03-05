@@ -89,7 +89,7 @@ namespace GitHubUpdate
             return await github.Miscellaneous.RenderRawMarkdown(latestRelease.Body);
         }
 
-        public async void DownloadAsset(string assetname)
+        public void DownloadAsset(string assetname)
         {
             assetname += latestRelease.TagName + ".rar";
             string url = $"https://github.com/{repositoryOwner}/{repostoryName}/releases/download/{latestRelease.TagName}/{assetname}";
