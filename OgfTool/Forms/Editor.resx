@@ -2256,9 +2256,7 @@
   <data name="LoadMenuParam.Text" xml:space="preserve">
     <value>Load</value>
   </data>
-  <data name="SaveMenuParam.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
-    <value>Ctrl+S</value>
-  </data>
+
   <data name="SaveMenuParam.Size" type="System.Drawing.Size, System.Drawing">
     <value>180, 22</value>
   </data>
