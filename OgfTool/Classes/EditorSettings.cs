@@ -6,7 +6,7 @@ namespace OgfTool
 {
     public class EditorSettings
     {
-        private IniFile pSettings = null;
+        private readonly IniFile pSettings = null;
         private string sMainSect = "settings";
 
         public int SETTINGS_VERS = 1;

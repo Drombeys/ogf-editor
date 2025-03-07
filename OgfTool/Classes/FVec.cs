@@ -5,7 +5,7 @@ namespace OgfTool
 {
     static internal class FVec
     {
-        static public float[] CrossProduct(float[] v1, float[] v2)
+        static public float[] CrossProduct(in float[] v1, in float[] v2)
         {
             var vec = new float[3] 
             {
@@ -17,7 +17,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public float DotProduct(float[] v1, float[] v2)
+        static public float DotProduct(in float[] v1, in float[] v2)
         {
             float product = 0.0f;
             for (int i = 0; i < 3; i++)
@@ -25,7 +25,7 @@ namespace OgfTool
             return product;
         }
 
-        static public float[] Sub(float[] v1, float[] v2)
+        static public float[] Sub(in float[] v1, in float[] v2)
         {
             var vec = new float[3]
             {
@@ -37,7 +37,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public float[] Add(float[] v1, float[] v2)
+        static public float[] Add(in float[] v1, in float[] v2)
         {
             var vec = new float[3]
             {
@@ -49,7 +49,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public float[] Mul(float[] v1, float val)
+        static public float[] Mul(in float[] v1, in float val)
         {
             var vec = new float[3]
             {
@@ -61,7 +61,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public float[] Mul(float[] v1, float[] v2)
+        static public float[] Mul(in float[] v1, in float[] v2)
         {
             var vec = new float[3]
             {
@@ -73,7 +73,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public float[] Div(float[] v1, float val)
+        static public float[] Div(in float[] v1, in float val)
         {
             var vec = new float[3]
             {
@@ -85,7 +85,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public float[] Min(float[] v1, float[] v2)
+        static public float[] Min(in float[] v1, in float[] v2)
         {
             var vec = new float[3]
             {
@@ -97,7 +97,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public float[] Max(float[] v1, float[] v2)
+        static public float[] Max(in float[] v1, in float[] v2)
         {
             var vec = new float[3]
             {
@@ -109,7 +109,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public float[] Normalize(float[] v)
+        static public float[] Normalize(in float[] v)
         {
             return Mul(v, 1.0f / (float)Math.Sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]));
         }
@@ -126,7 +126,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public float[] RotateXYZRad(float[] v, float[] rot, float[] center)
+        static public float[] RotateXYZRad(in float[] v, in float[] rot, in float[] center)
         {
             float yaw = rot[0];
             float pitch = rot[1];
@@ -135,7 +135,7 @@ namespace OgfTool
             return RotateYPR(v, yaw, pitch, roll, center);
         }
 
-        static public float[] RotateXYZRad(float[] v, float[] rot)
+        static public float[] RotateXYZRad(in float[] v, in float[] rot)
         {
             float yaw = rot[0];
             float pitch = rot[1];
@@ -144,7 +144,7 @@ namespace OgfTool
             return RotateYPR(v, yaw, pitch, roll, new float[3]);
         }
 
-        static public float[] RotateXYZRad(float[] v, float x, float y, float z, float[] center)
+        static public float[] RotateXYZRad(in float[] v, in float x, in float y, in float z, in float[] center)
         {
             float yaw = z;
             float pitch = y;
@@ -153,7 +153,7 @@ namespace OgfTool
             return RotateYPR(v, yaw, pitch, roll, center);
         }
 
-        static public float[] RotateXYZRad(float[] v, float x, float y, float z)
+        static public float[] RotateXYZRad(in float[] v, in float x, in float y, in float z)
         {
             float yaw = z;
             float pitch = y;
@@ -162,7 +162,7 @@ namespace OgfTool
             return RotateYPR(v, yaw, pitch, roll, new float[3]);
         }
 
-        static public float[] RotateXYZ(float[] v, float[] rot, float[] center)
+        static public float[] RotateXYZ(in float[] v, in float[] rot, in float[] center)
         {
             float yaw = rot[0] * (float)(Math.PI / 180.0f);
             float pitch = rot[1] * (float)(Math.PI / 180.0f);
@@ -171,7 +171,7 @@ namespace OgfTool
             return RotateYPR(v, yaw, pitch, roll, center);
         }
 
-        static public float[] RotateXYZ(float[] v, float[] rot)
+        static public float[] RotateXYZ(in float[] v, in float[] rot)
         {
             float yaw = rot[0] * (float)(Math.PI / 180.0f);
             float pitch = rot[1] * (float)(Math.PI / 180.0f);
@@ -180,7 +180,7 @@ namespace OgfTool
             return RotateYPR(v, yaw, pitch, roll, new float[3]);
         }
 
-        static public float[] RotateXYZ(float[] v, float x, float y, float z, float[] center)
+        static public float[] RotateXYZ(in float[] v, in float x, in float y, in float z, in float[] center)
         {
             float yaw = z * (float)(Math.PI / 180.0f);
             float pitch = y * (float)(Math.PI / 180.0f);
@@ -189,7 +189,7 @@ namespace OgfTool
             return RotateYPR(v, yaw, pitch, roll, center);
         }
 
-        static public float[] RotateXYZ(float[] v, float x, float y, float z)
+        static public float[] RotateXYZ(in float[] v, in float x, in float y, in float z)
         {
             float yaw = z * (float)(Math.PI / 180.0f);
             float pitch = y * (float)(Math.PI / 180.0f);
@@ -198,7 +198,7 @@ namespace OgfTool
             return RotateYPR(v, yaw, pitch, roll, new float[3]);
         }
 
-        static public float[] RotateYPR(float[] v, float yaw, float pitch, float roll, float[] center)
+        static public float[] RotateYPR(in float[] v, in float yaw, in float pitch, in float roll, in float[] center)
         {
             float[] rotated = new float[3];
 
@@ -234,17 +234,17 @@ namespace OgfTool
             return rotated;
         }
 
-        static public float[] RotateYPR(float[] v, float[] ypr, float[] center)
+        static public float[] RotateYPR(in float[] v, in float[] ypr, in float[] center)
         {
             return RotateYPR(v, ypr[0], ypr[1], ypr[2], center);
         }
 
-        static public float[] RotateYPR(float[] v, float[] ypr)
+        static public float[] RotateYPR(in float[] v, in float[] ypr)
         {
             return RotateYPR(v, ypr[0], ypr[1], ypr[2], new float[3]);
         }
 
-        static public bool Similar(float[] v1, float[] v2)
+        static public bool Similar(in float[] v1, in float[] v2)
         {
             if (v1[0] != v2[0]) return false;
             if (v1[1] != v2[1]) return false;
@@ -253,7 +253,7 @@ namespace OgfTool
             return true;
         }
 
-        static public bool IsNan(float[] v1)
+        static public bool IsNan(in float[] v1)
         {
             for (int i = 0; i < 3; i++)
             {
@@ -264,25 +264,25 @@ namespace OgfTool
             return false;
         }
 
-        static public string vPUSH(float[] vec, string format = null)
+        static public string VPUSH(in float[] vec, string format = null)
         {
             if (format != null)
-                return vec[0].ToString(format) + " " + vec[1].ToString(format) + " " + vec[2].ToString(format);
+                return $"{vec[0].ToString(format)} {vec[1].ToString(format)} {vec[2].ToString(format)}";
             else
-                return vec[0].ToString() + " " + vec[1].ToString() + " " + vec[2].ToString();
+                return $"{vec[0]} {vec[1]} {vec[2]}";
         }
 
-        static public float DistanceToSqr(float[] from, float[] to)
+        static public float DistanceToSqr(in float[] from, in float[] to)
         {
-            return (from[0]-to[0])*(from[0]-to[0]) + (from[1]-to[1])*(from[1]-to[1]) + (from[2]-to[2])*(from[2]-to[2]);
+            return (from[0] - to[0]) * (from[0] - to[0]) + (from[1] - to[1]) * (from[1] - to[1]) + (from[2] - to[2]) * (from[2] - to[2]);
         }
 
-        static public float DistanceTo(float[] from, float[] to)
+        static public float DistanceTo(in float[] from, in float[] to)
         {
             return (float)Math.Sqrt(DistanceToSqr(from, to));
         }
 
-        static public byte[] GetBytes(float[] vec)
+        static public byte[] GetBytes(in float[] vec)
         {
             List<byte> bytes = new List<byte>();
             bytes.AddRange(BitConverter.GetBytes(vec[0]));

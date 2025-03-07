@@ -5,8 +5,8 @@ namespace OgfTool
 {
     public class BBox
     {
-        public float[] min;
-        public float[] max;
+        public float[] Min { get; set; }
+        public float[] Max { get; set; }
 
         public BBox()
         {
@@ -15,55 +15,55 @@ namespace OgfTool
 
         public void Load(XRayLoader xr_loader)
         {
-            min = xr_loader.ReadVector();
-            max = xr_loader.ReadVector();
+            Min = xr_loader.ReadVector();
+            Max = xr_loader.ReadVector();
         }
 
-        public byte[] data()
+        public byte[] Data()
         {
             List<byte> temp = new List<byte>();
 
-            temp.AddRange(FVec.GetBytes(min));
-            temp.AddRange(FVec.GetBytes(max));
+            temp.AddRange(FVec.GetBytes(Min));
+            temp.AddRange(FVec.GetBytes(Max));
 
             return temp.ToArray();
         }
 
         public void Identity()
         {
-            min = new float[3];
-            max = new float[3];
+            Min = new float[3];
+            Max = new float[3];
         }
 
         public void Invalidate()
         {
-            min = new float[3] { float.MaxValue, float.MaxValue, float.MaxValue };
-            max = new float[3] { float.MinValue, float.MinValue, float.MinValue };
+            Min = new float[3] { float.MaxValue, float.MaxValue, float.MaxValue };
+            Max = new float[3] { float.MinValue, float.MinValue, float.MinValue };
         }
 
         public void Set(float[] min, float[] max)
         {
-            this.min = min;
-            this.max = max;
+            Min = min;
+            Max = max;
         }
 
         public void Modify(float[] vec)
         {
-            min = FVec.Min(min, vec);
-            min = FVec.Min(max, vec);
+            Min = FVec.Min(Min, vec);
+            Min = FVec.Min(Max, vec);
         }
 
         public void Merge(BBox box)
         {
-            Modify(box.min);
-            Modify(box.max);
+            Modify(box.Min);
+            Modify(box.Max);
         }
 
         public float[] GetCenter()
         {
             float[] C = new float[3];
             for (int i = 0; i < 3; i++)
-                C[i] = (min[i] + max[i]) * 0.5f;
+                C[i] = (Min[i] + Max[i]) * 0.5f;
 
             return C;
         }
@@ -79,31 +79,31 @@ namespace OgfTool
         {
             List<SSkelVert> verts = new List<SSkelVert>();
 
-            float x_diff = max[0] - min[0];
-            float y_diff = max[1] - min[1];
-            float z_diff = max[2] - min[2];
+            float x_diff = Max[0] - Min[0];
+            float y_diff = Max[1] - Min[1];
+            float z_diff = Max[2] - Min[2];
 
             // Back start
             {
                 SSkelVert vert1 = new SSkelVert(); // 1 Vert
-                vert1.offs = new float[3] { min[0], min[1], min[2] };
+                vert1.Offs = new float[3] { Min[0], Min[1], Min[2] };
                 vert1.norm = new float[3] { 0.0f, 0.0f, -1.0f };
-                vert1.uv = new float[2] { 0.0f, 1.0f };
+                vert1.Uv = new float[2] { 0.0f, 1.0f };
 
                 SSkelVert vert2 = new SSkelVert(); // 2 Vert
-                vert2.offs = new float[3] { min[0] + x_diff, min[1], min[2] };
+                vert2.Offs = new float[3] { Min[0] + x_diff, Min[1], Min[2] };
                 vert2.norm = new float[3] { 0.0f, 0.0f, -1.0f };
-                vert2.uv = new float[2] { 1.0f, 1.0f };
+                vert2.Uv = new float[2] { 1.0f, 1.0f };
 
                 SSkelVert vert3 = new SSkelVert(); // 3 Vert
-                vert3.offs = new float[3] { min[0], min[1] + y_diff, min[2] };
+                vert3.Offs = new float[3] { Min[0], Min[1] + y_diff, Min[2] };
                 vert3.norm = new float[3] { 0.0f, 0.0f, -1.0f };
-                vert3.uv = new float[2] { 0.0f, 0.0f };
+                vert3.Uv = new float[2] { 0.0f, 0.0f };
 
                 SSkelVert vert4 = new SSkelVert(); // 4 Vert
-                vert4.offs = new float[3] { min[0] + x_diff, min[1] + y_diff, min[2] };
+                vert4.Offs = new float[3] { Min[0] + x_diff, Min[1] + y_diff, Min[2] };
                 vert4.norm = new float[3] { 0.0f, 0.0f, -1.0f };
-                vert4.uv = new float[2] { 1.0f, 0.0f };
+                vert4.Uv = new float[2] { 1.0f, 0.0f };
 
                 verts.Add(vert1);
                 verts.Add(vert2);
@@ -115,24 +115,24 @@ namespace OgfTool
             // Left start
             {
                 SSkelVert vert1 = new SSkelVert(); // 5 Vert
-                vert1.offs = new float[3] { min[0], min[1], min[2] };
+                vert1.Offs = new float[3] { Min[0], Min[1], Min[2] };
                 vert1.norm = new float[3] { -1.0f, 0.0f, 0.0f };
-                vert1.uv = new float[2] { 1.0f, 1.0f };
+                vert1.Uv = new float[2] { 1.0f, 1.0f };
 
                 SSkelVert vert2 = new SSkelVert(); // 6 Vert
-                vert2.offs = new float[3] { min[0], min[1] + y_diff, min[2] };
+                vert2.Offs = new float[3] { Min[0], Min[1] + y_diff, Min[2] };
                 vert2.norm = new float[3] { -1.0f, 0.0f, 0.0f };
-                vert2.uv = new float[2] { 1.0f, 0.0f };
+                vert2.Uv = new float[2] { 1.0f, 0.0f };
 
                 SSkelVert vert3 = new SSkelVert(); // 7 Vert
-                vert3.offs = new float[3] { min[0], min[1], min[2] + z_diff };
+                vert3.Offs = new float[3] { Min[0], Min[1], Min[2] + z_diff };
                 vert3.norm = new float[3] { -1.0f, 0.0f, 0.0f };
-                vert3.uv = new float[2] { 0.0f, 1.0f };
+                vert3.Uv = new float[2] { 0.0f, 1.0f };
 
                 SSkelVert vert4 = new SSkelVert(); // 8 Vert
-                vert4.offs = new float[3] { min[0], min[1] + y_diff, min[2] + z_diff };
+                vert4.Offs = new float[3] { Min[0], Min[1] + y_diff, Min[2] + z_diff };
                 vert4.norm = new float[3] { -1.0f, 0.0f, 0.0f };
-                vert4.uv = new float[2] { 0.0f, 0.0f };
+                vert4.Uv = new float[2] { 0.0f, 0.0f };
 
                 verts.Add(vert1);
                 verts.Add(vert2);
@@ -144,24 +144,24 @@ namespace OgfTool
             // Right start
             {
                 SSkelVert vert1 = new SSkelVert(); // 9 Vert
-                vert1.offs = new float[3] { min[0] + x_diff, min[1], min[2] };
+                vert1.Offs = new float[3] { Min[0] + x_diff, Min[1], Min[2] };
                 vert1.norm = new float[3] { 1.0f, 0.0f, 0.0f };
-                vert1.uv = new float[2] { 0.0f, 1.0f };
+                vert1.Uv = new float[2] { 0.0f, 1.0f };
 
                 SSkelVert vert2 = new SSkelVert(); // 10 Vert
-                vert2.offs = new float[3] { min[0] + x_diff, min[1], min[2] + z_diff };
+                vert2.Offs = new float[3] { Min[0] + x_diff, Min[1], Min[2] + z_diff };
                 vert2.norm = new float[3] { 1.0f, 0.0f, 0.0f };
-                vert2.uv = new float[2] { 1.0f, 1.0f };
+                vert2.Uv = new float[2] { 1.0f, 1.0f };
 
                 SSkelVert vert3 = new SSkelVert(); // 11 Vert
-                vert3.offs = new float[3] { min[0] + x_diff, min[1] + y_diff, min[2] };
+                vert3.Offs = new float[3] { Min[0] + x_diff, Min[1] + y_diff, Min[2] };
                 vert3.norm = new float[3] { 1.0f, 0.0f, 0.0f };
-                vert3.uv = new float[2] { 0.0f, 0.0f };
+                vert3.Uv = new float[2] { 0.0f, 0.0f };
 
                 SSkelVert vert4 = new SSkelVert(); // 12 Vert
-                vert4.offs = new float[3] { max[0], max[1], max[2] };
+                vert4.Offs = new float[3] { Max[0], Max[1], Max[2] };
                 vert4.norm = new float[3] { 1.0f, 0.0f, 0.0f };
-                vert4.uv = new float[2] { 1.0f, 0.0f };
+                vert4.Uv = new float[2] { 1.0f, 0.0f };
 
                 verts.Add(vert1);
                 verts.Add(vert2);
@@ -173,24 +173,24 @@ namespace OgfTool
             // Front start
             {
                 SSkelVert vert1 = new SSkelVert(); // 13 Vert
-                vert1.offs = new float[3] { min[0], min[1], min[2] + z_diff };
+                vert1.Offs = new float[3] { Min[0], Min[1], Min[2] + z_diff };
                 vert1.norm = new float[3] { 0.0f, 0.0f, 1.0f };
-                vert1.uv = new float[2] { 1.0f, 1.0f };
+                vert1.Uv = new float[2] { 1.0f, 1.0f };
 
                 SSkelVert vert2 = new SSkelVert(); // 14 Vert
-                vert2.offs = new float[3] { min[0] + x_diff, min[1], min[2] + z_diff };
+                vert2.Offs = new float[3] { Min[0] + x_diff, Min[1], Min[2] + z_diff };
                 vert2.norm = new float[3] { 0.0f, 0.0f, 1.0f };
-                vert2.uv = new float[2] { 0.0f, 1.0f };
+                vert2.Uv = new float[2] { 0.0f, 1.0f };
 
                 SSkelVert vert3 = new SSkelVert(); // 15 Vert
-                vert3.offs = new float[3] { min[0], min[1] + y_diff, min[2] + z_diff };
+                vert3.Offs = new float[3] { Min[0], Min[1] + y_diff, Min[2] + z_diff };
                 vert3.norm = new float[3] { 0.0f, 0.0f, 1.0f };
-                vert3.uv = new float[2] { 1.0f, 0.0f };
+                vert3.Uv = new float[2] { 1.0f, 0.0f };
 
                 SSkelVert vert4 = new SSkelVert(); // 16 Vert
-                vert4.offs = new float[3] { max[0], max[1], max[2] };
+                vert4.Offs = new float[3] { Max[0], Max[1], Max[2] };
                 vert4.norm = new float[3] { 0.0f, 0.0f, 1.0f };
-                vert4.uv = new float[2] { 0.0f, 0.0f };
+                vert4.Uv = new float[2] { 0.0f, 0.0f };
 
                 verts.Add(vert1);
                 verts.Add(vert2);
@@ -202,24 +202,24 @@ namespace OgfTool
             // Up start
             {
                 SSkelVert vert1 = new SSkelVert(); // 17 Vert
-                vert1.offs = new float[3] { min[0], min[1] + y_diff, min[2] };
+                vert1.Offs = new float[3] { Min[0], Min[1] + y_diff, Min[2] };
                 vert1.norm = new float[3] { 0.0f, 1.0f, 0.0f };
-                vert1.uv = new float[2] { 0.0f, 1.0f };
+                vert1.Uv = new float[2] { 0.0f, 1.0f };
 
                 SSkelVert vert2 = new SSkelVert(); // 18 Vert
-                vert2.offs = new float[3] { min[0] + x_diff, min[1] + y_diff, min[2] };
+                vert2.Offs = new float[3] { Min[0] + x_diff, Min[1] + y_diff, Min[2] };
                 vert2.norm = new float[3] { 0.0f, 1.0f, 0.0f };
-                vert2.uv = new float[2] { 1.0f, 1.0f };
+                vert2.Uv = new float[2] { 1.0f, 1.0f };
 
                 SSkelVert vert3 = new SSkelVert(); // 19 Vert
-                vert3.offs = new float[3] { min[0], min[1] + y_diff, min[2] + z_diff };
+                vert3.Offs = new float[3] { Min[0], Min[1] + y_diff, Min[2] + z_diff };
                 vert3.norm = new float[3] { 0.0f, 1.0f, 0.0f };
-                vert3.uv = new float[2] { 0.0f, 0.0f };
+                vert3.Uv = new float[2] { 0.0f, 0.0f };
 
                 SSkelVert vert4 = new SSkelVert(); // 20 Vert
-                vert4.offs = new float[3] { max[0], max[1], max[2] };
+                vert4.Offs = new float[3] { Max[0], Max[1], Max[2] };
                 vert4.norm = new float[3] { 0.0f, 1.0f, 0.0f };
-                vert4.uv = new float[2] { 1.0f, 0.0f };
+                vert4.Uv = new float[2] { 1.0f, 0.0f };
 
                 verts.Add(vert1);
                 verts.Add(vert2);
@@ -231,24 +231,24 @@ namespace OgfTool
             // Down start
             {
                 SSkelVert vert1 = new SSkelVert(); // 21 Vert
-                vert1.offs = new float[3] { min[0], min[1], min[2] };
+                vert1.Offs = new float[3] { Min[0], Min[1], Min[2] };
                 vert1.norm = new float[3] { 0.0f, -1.0f, 0.0f };
-                vert1.uv = new float[2] { 1.0f, 1.0f };
+                vert1.Uv = new float[2] { 1.0f, 1.0f };
 
                 SSkelVert vert2 = new SSkelVert(); // 22 Vert
-                vert2.offs = new float[3] { min[0] + x_diff, min[1], min[2] };
+                vert2.Offs = new float[3] { Min[0] + x_diff, Min[1], Min[2] };
                 vert2.norm = new float[3] { 0.0f, -1.0f, 0.0f };
-                vert2.uv = new float[2] { 0.0f, 1.0f };
+                vert2.Uv = new float[2] { 0.0f, 1.0f };
 
                 SSkelVert vert3 = new SSkelVert(); // 23 Vert
-                vert3.offs = new float[3] { min[0], min[1], min[2] + z_diff };
+                vert3.Offs = new float[3] { Min[0], Min[1], Min[2] + z_diff };
                 vert3.norm = new float[3] { 0.0f, -1.0f, 0.0f };
-                vert3.uv = new float[2] { 1.0f, 0.0f };
+                vert3.Uv = new float[2] { 1.0f, 0.0f };
 
                 SSkelVert vert4 = new SSkelVert(); // 24 Vert
-                vert4.offs = new float[3] { min[0] + x_diff, min[1], min[2] + z_diff };
+                vert4.Offs = new float[3] { Min[0] + x_diff, Min[1], Min[2] + z_diff };
                 vert4.norm = new float[3] { 0.0f, -1.0f, 0.0f };
-                vert4.uv = new float[2] { 0.0f, 0.0f };
+                vert4.Uv = new float[2] { 0.0f, 0.0f };
 
                 verts.Add(vert1);
                 verts.Add(vert2);
@@ -288,7 +288,7 @@ namespace OgfTool
                 for (int j = 0; j < 3; j++)
                 {
                     int vert_idx = VertsCount - FaceVertList[i, j] + 1;
-                    face.v[j] = (ushort)(Verts.Count - vert_idx);
+                    face.Vertex[j] = (ushort)(Verts.Count - vert_idx);
                 }
 
                 faces.Add(face);
@@ -300,8 +300,8 @@ namespace OgfTool
 
     public class BSphere
     {
-        public float[] c;
-        public float r;
+        public float[] Center { get; set; }
+        public float Radius { get; set; }
 
         public BSphere()
         {
@@ -310,28 +310,28 @@ namespace OgfTool
 
         public void Identity()
         {
-            c = new float[3];
-            r = 0.0f;
+            Center = new float[3];
+            Radius = 0.0f;
         }
 
         public void Load(XRayLoader xr_loader)
         {
-            c = xr_loader.ReadVector();
-            r = xr_loader.ReadFloat();
+            Center = xr_loader.ReadVector();
+            Radius = xr_loader.ReadFloat();
         }
 
         public void CreateSphere(BBox box)
         {
-            c = box.GetCenter();
-            r = FVec.DistanceTo(c, box.max);
+            Center = box.GetCenter();
+            Radius = FVec.DistanceTo(Center, box.Max);
         }
 
-        public byte[] data()
+        public byte[] Data()
         {
             List<byte> temp = new List<byte>();
 
-            temp.AddRange(FVec.GetBytes(c));
-            temp.AddRange(BitConverter.GetBytes(r));
+            temp.AddRange(FVec.GetBytes(Center));
+            temp.AddRange(BitConverter.GetBytes(Radius));
 
             return temp.ToArray();
         }

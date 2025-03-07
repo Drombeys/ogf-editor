@@ -5,7 +5,7 @@ namespace OgfTool
 {
     static internal class FVec2
     {
-        static public float[] Sub(float[] v1, float[] v2)
+        static public float[] Sub(in float[] v1, in float[] v2)
         {
             var vec = new float[2]
             {
@@ -16,7 +16,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public float[] Add(float[] v1, float[] v2)
+        static public float[] Add(in float[] v1, in float[] v2)
         {
             var vec = new float[2]
             {
@@ -27,7 +27,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public float[] Mul(float[] v1, float val)
+        static public float[] Mul(in float[] v1, in float val)
         {
             var vec = new float[2]
             {
@@ -37,7 +37,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public float[] Mul(float[] v1, float[] v2)
+        static public float[] Mul(in float[] v1, in float[] v2)
         {
             var vec = new float[2]
             {
@@ -48,7 +48,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public float[] Div(float[] v1, float val)
+        static public float[] Div(in float[] v1, in float val)
         {
             var vec = new float[2]
             {
@@ -59,7 +59,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public float[] Min(float[] v1, float[] v2)
+        static public float[] Min(in float[] v1, in float[] v2)
         {
             var vec = new float[2]
             {
@@ -70,7 +70,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public float[] Max(float[] v1, float[] v2)
+        static public float[] Max(in float[] v1, in float[] v2)
         {
             var vec = new float[2]
             {
@@ -81,7 +81,7 @@ namespace OgfTool
             return vec;
         }
 
-        static public bool Similar(float[] v1, float[] v2)
+        static public bool Similar(in float[] v1, in float[] v2)
         {
             if (v1[0] != v2[0]) return false;
             if (v1[1] != v2[1]) return false;
@@ -89,12 +89,12 @@ namespace OgfTool
             return true;
         }
 
-        static public float[] Normalize(float[] v)
+        static public float[] Normalize(in float[] v)
         {
             return Mul(v, 1.0f / (float)Math.Sqrt(v[0]*v[0] + v[1]*v[1]));
         }
 
-        static public string vPUSH(float[] vec, string format = null)
+        static public string vPUSH(in float[] vec, string format = null)
         {
             if (format != null)
                 return vec[0].ToString(format) + " " + vec[1].ToString(format);
@@ -102,7 +102,7 @@ namespace OgfTool
                 return vec[0].ToString() + " " + vec[1].ToString();
         }
 
-        static public byte[] GetBytes(float[] vec)
+        static public byte[] GetBytes(in float[] vec)
         {
             List<byte> bytes = new List<byte>();
             bytes.AddRange(BitConverter.GetBytes(vec[0]));

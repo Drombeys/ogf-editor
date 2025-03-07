@@ -61,7 +61,7 @@ namespace OgfTool {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Model Format: All.
+        ///   Looks up a localized string similar to Model format: All.
         /// </summary>
         public static string AllFormat {
             get {
@@ -70,7 +70,7 @@ namespace OgfTool {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Model Format: CoP.
+        ///   Looks up a localized string similar to Model format: CoP.
         /// </summary>
         public static string CoPFormat {
             get {
@@ -79,7 +79,7 @@ namespace OgfTool {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Model Format: SoC.
+        ///   Looks up a localized string similar to Model format: SoC.
         /// </summary>
         public static string SoCFormat {
             get {

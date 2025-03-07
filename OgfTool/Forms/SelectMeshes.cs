@@ -10,21 +10,21 @@ namespace OgfTool
         public List<bool> MeshChecked = new List<bool>();
         public bool res = false;
 
-        public SelectMeshes(XRay_Model Model)
+        public SelectMeshes(XRayModel Model)
         {
             InitializeComponent();
 
             MeshPanel.Controls.Clear();
 
-            for (int i = 0; i < Model.childs.Count; i++)
+            for (int i = 0; i < Model.Childs.Count; i++)
             {
                 var MeshCbx = Copy.CheckBox(MeshCheckBox);
                 MeshCbx.Name = "MeshCheckBox_" + i;
-                MeshCbx.Text += $" [{Model.childs[i].m_texture}] | [{Model.childs[i].m_shader}]";
+                MeshCbx.Text += $" [{Model.Childs[i].Texture}] | [{Model.Childs[i].Shader}]";
                 MeshCbx.Location = new Point(MeshCbx.Location.X, MeshCbx.Location.Y + 27 * i);
                 MeshCbx.Size = new Size(1000, MeshCbx.Size.Height);
 
-                if (i != Model.childs.Count - 1)
+                if (i != Model.Childs.Count - 1)
                 {
                     Size = new Size(Size.Width, Size.Height + 27);
                     MeshPanel.Size = new Size(Size.Width, Size.Height + 27);

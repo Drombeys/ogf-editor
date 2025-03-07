@@ -49,7 +49,7 @@ namespace OgfTool
 
                 for (int i = 0; i < files.Length; i++)
                 {
-                    XRay_Model Model = new XRay_Model();
+                    XRayModel Model = new XRayModel();
                     bool save = false;
                     if (Model.OpenFile(files[i], true))
                     {

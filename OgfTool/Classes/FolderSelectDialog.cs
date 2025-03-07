@@ -166,7 +166,7 @@ namespace OgfTool
     /// http://code.google.com/p/fed/
     ///
     /// Example:
-    /// var r = new Reflector("System.Windows.Forms");
+    /// var Radius = new Reflector("System.Windows.Forms");
     /// </summary>
     public class Reflector
     {
@@ -211,10 +211,10 @@ namespace OgfTool
         #region Methods
 
         /// <summary>
-        /// Return a Type instance for a type 'typeName'
+        /// Return a Type instance for a Type 'typeName'
         /// </summary>
-        /// <param name="typeName">The name of the type</param>
-        /// <returns>A type instance</returns>
+        /// <param name="typeName">The name of the Type</param>
+        /// <returns>A Type instance</returns>
         public Type GetType(string typeName)
         {
             Type type = null;
@@ -231,11 +231,11 @@ namespace OgfTool
         }
 
         /// <summary>
-        /// Create a new object of a named type passing along any params
+        /// Create a new object of a named Type passing along any params
         /// </summary>
-        /// <param name="name">The name of the type to create</param>
+        /// <param name="name">The name of the Type to create</param>
         /// <param name="parameters"></param>
-        /// <returns>An instantiated type</returns>
+        /// <returns>An instantiated Type</returns>
         public object New(string name, params object[] parameters)
         {
             Type type = GetType(name);
@@ -278,9 +278,9 @@ namespace OgfTool
         }
 
         /// <summary>
-        /// Calls method 'func' on object 'obj' which is of type 'type' passing parameters 'parameters'
+        /// Calls method 'func' on object 'obj' which is of Type 'Type' passing parameters 'parameters'
         /// </summary>
-        /// <param name="type">The type of 'obj'</param>
+        /// <param name="type">The Type of 'obj'</param>
         /// <param name="obj">The object on which to excute function 'func'</param>
         /// <param name="func">The function to execute</param>
         /// <param name="parameters">The parameters to pass to function 'func'</param>
@@ -291,9 +291,9 @@ namespace OgfTool
         }
 
         /// <summary>
-        /// Calls method 'func' on object 'obj' which is of type 'type' passing parameters 'parameters'
+        /// Calls method 'func' on object 'obj' which is of Type 'Type' passing parameters 'parameters'
         /// </summary>
-        /// <param name="type">The type of 'obj'</param>
+        /// <param name="type">The Type of 'obj'</param>
         /// <param name="obj">The object on which to excute function 'func'</param>
         /// <param name="func">The function to execute</param>
         /// <param name="parameters">The parameters to pass to function 'func'</param>
@@ -316,9 +316,9 @@ namespace OgfTool
         }
 
         /// <summary>
-        /// Returns the value of property 'prop' of object 'obj' which has type 'type'
+        /// Returns the value of property 'prop' of object 'obj' which has Type 'Type'
         /// </summary>
-        /// <param name="type">The type of 'obj'</param>
+        /// <param name="type">The Type of 'obj'</param>
         /// <param name="obj">The object containing 'prop'</param>
         /// <param name="prop">The property name</param>
         /// <returns>The property value</returns>
@@ -331,7 +331,7 @@ namespace OgfTool
         /// <summary>
         /// Returns an enum value
         /// </summary>
-        /// <param name="typeName">The name of enum type</param>
+        /// <param name="typeName">The name of enum Type</param>
         /// <param name="name">The name of the value</param>
         /// <returns>The enum value</returns>
         public object GetEnum(string typeName, string name)

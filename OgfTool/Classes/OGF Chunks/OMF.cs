@@ -15,82 +15,84 @@ namespace OgfTool
             }
         }
 
-        private byte[] omf_data;
-        private string omf_text;
-        public List<Anim> Anims;
+        private byte[] omfData;
+        private string omfText;
+
+        public List<Anim> Anims { get; private set; }
 
         public OMF()
         {
-            omf_data = null;
+            omfData = null;
             Anims = null;
-            omf_text = "";
+            omfText = string.Empty;
         }
 
         public bool SetData(byte[] _data)
         {
-            if (_data != null)
+            if (_data == null)
             {
-                omf_data = _data;
-
-                XRayLoader xr_loader = new XRayLoader();
-
-                using (var r = new BinaryReader(new MemoryStream(data())))
-                {
-                    xr_loader.SetStream(r.BaseStream);
-
-                    if (xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk((int)OGF.OGF_S_MOTIONS, false, true)))
-                    {
-                        omf_text = "";
-                        Anims = new List<Anim>();
-
-                        int id = 0;
-
-                        while (true)
-                        {
-                            if (!xr_loader.find_chunk(id)) break;
-
-                            Stream temp = xr_loader.reader.BaseStream;
-
-                            if (!xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk(id, false, true))) break;
-
-                            Anim anim = new Anim();
-
-                            if (id == 0)
-                                omf_text += $"Motions count : {xr_loader.ReadUInt32()}\n";
-                            else
-                            {
-                                omf_text += $"\n{id}. {xr_loader.read_stringZ()}";
-                                xr_loader.ReadUInt32();
-                                anim.flags = xr_loader.ReadByte();
-                            }
-
-                            id++;
-                            xr_loader.SetStream(temp);
-                            Anims.Add(anim);
-                        }
-
-                        return true;
-                    }
-                }
+                omfData = null;
+                Anims = null;
+                omfText = string.Empty;
             }
             else
             {
-                omf_data = null;
-                Anims = null;
-                omf_text = "";
+                omfData = _data;
+
+                using (XRayLoader xr_loader = new XRayLoader())
+                {
+                    using (var r = new BinaryReader(new MemoryStream(Data())))
+                    {
+                        xr_loader.SetStream(r.BaseStream);
+
+                        if (xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk((int)OGF.OGF_S_MOTIONS, false, true)))
+                        {
+                            omfText = "";
+                            Anims = new List<Anim>();
+
+                            int id = 0;
+
+                            while (true)
+                            {
+                                if (!xr_loader.find_chunk(id)) break;
+
+                                Stream temp = xr_loader.Reader.BaseStream;
+
+                                if (!xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk(id, false, true))) break;
+
+                                Anim anim = new Anim();
+
+                                if (id == 0)
+                                    omfText += $"Motions count : {xr_loader.ReadUInt32()}\n";
+                                else
+                                {
+                                    omfText += $"\n{id}. {xr_loader.ReadStringZ()}";
+                                    xr_loader.ReadUInt32();
+                                    anim.flags = xr_loader.ReadByte();
+                                }
+
+                                id++;
+                                xr_loader.SetStream(temp);
+                                Anims.Add(anim);
+                            }
+
+                            return true;
+                        }
+                    }
+                }
             }
 
             return false;
         }
 
-        public byte[] data()
+        public byte[] Data()
         {
-            return omf_data;
+            return omfData;
         }
 
         public override string ToString()
         {
-            return omf_text;
+            return omfText;
         }
     }
 }

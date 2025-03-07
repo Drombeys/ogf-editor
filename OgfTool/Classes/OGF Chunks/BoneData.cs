@@ -1,50 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace OgfTool
 {
     public class Bone
     {
-        public string name;
-        public string parent_name;
-        public byte[] fobb;
+        public string Name { get; set; }
+        public string ParentName { get; set; }
+        public byte[] Fobb { get; set; }
 
-        public List<int> childs_id;
+        public List<int> ChildsId { get; private set; }
 
         public Bone()
         {
-            childs_id = new List<int>();
+            ChildsId = new List<int>();
         }
 
-        public string GetNotNullName()
-        {
-            if (name == "")
-                return "noname_bone";
-            else
-                return name;
-        }
+        public string GetNotNullName() => string.IsNullOrEmpty(Name) ? "noname_bone" : Name;
     }
 
     public class BoneData
     {
-        public long pos;
-        public int old_size;
-        public List<Bone> bones;
+        public long Pos { get; private set; }
+        public int OldSize { get; set; }
+        public List<Bone> Bones { get; set; }
 
         public BoneData()
         {
-            pos = 0;
-            old_size = 0;
-            bones = new List<Bone>();
+            Pos = 0;
+            OldSize = 0;
+            Bones = new List<Bone>();
         }
 
         public int GetBoneID(string bone)
         {
-            for (int i = 0; i < bones.Count; i++)
+            for (int i = 0; i < Bones.Count; i++)
             {
-                if (bones[i].name == bone)
+                if (Bones[i].Name == bone)
                     return i;
             }
             return -1;
@@ -52,61 +45,63 @@ namespace OgfTool
 
         public string GetBoneName(int bone)
         {
-            if (bones.Count > bone)
-                return bones[bone].name;
+            if (Bones.Count > bone)
+                return Bones[bone].Name;
 
-            return "";
+            return string.Empty;
         }
 
         public void RemoveBone(int bone)
         {
-            bones.RemoveAt(bone);
+            Bones.RemoveAt(bone);
         }
 
         public void RecalcChilds()
         {
-            for (int i = 0; i < bones.Count; i++)
+            for (int i = 0; i < Bones.Count; i++)
             {
-                bones[i].childs_id.Clear();
-                for (int j = 0; j < bones.Count; j++)
+                Bones[i].ChildsId.Clear();
+                for (int j = 0; j < Bones.Count; j++)
                 {
-                    if (bones[j].parent_name == bones[i].name)
-                        bones[i].childs_id.Add(j);
+                    if (Bones[j].ParentName == Bones[i].Name)
+                        Bones[i].ChildsId.Add(j);
                 }
             }
         }
 
         public void Load(XRayLoader xr_loader)
         {
-            pos = xr_loader.chunk_pos;
+            Pos = xr_loader.ChunkPos;
 
             uint count = xr_loader.ReadUInt32();
 
             for (; count != 0; count--)
             {
-                Bone bone = new Bone();
-                bone.name = xr_loader.read_stringZ();
-                bone.parent_name = xr_loader.read_stringZ();
-                bone.fobb = xr_loader.ReadBytes(60);
-                bones.Add(bone);
+                Bone bone = new Bone
+                {
+                    Name = xr_loader.ReadStringZ(),
+                    ParentName = xr_loader.ReadStringZ(),
+                    Fobb = xr_loader.ReadBytes(60)
+                };
+                Bones.Add(bone);
             }
 
             RecalcChilds();
 
-            old_size = data(false).Length;
+            OldSize = Data(false).Length;
         }
 
-        public byte[] data(bool repair)
+        public byte[] Data(bool repair)
         {
             List<byte> temp = new List<byte>();
 
-            temp.AddRange(BitConverter.GetBytes(bones.Count));
+            temp.AddRange(BitConverter.GetBytes(Bones.Count));
 
-            for (int i = 0; i < bones.Count; i++)
+            for (int i = 0; i < Bones.Count; i++)
             {
-                temp.AddRange(Encoding.Default.GetBytes(bones[i].name));
+                temp.AddRange(Encoding.Default.GetBytes(Bones[i].Name));
                 temp.Add(0);
-                temp.AddRange(Encoding.Default.GetBytes(bones[i].parent_name));
+                temp.AddRange(Encoding.Default.GetBytes(Bones[i].ParentName));
                 temp.Add(0);
 
                 if (repair)
@@ -115,18 +110,30 @@ namespace OgfTool
                         temp.Add(0);
                 }
                 else
-                    temp.AddRange(bones[i].fobb);
+                    temp.AddRange(Bones[i].Fobb);
             }
 
             return temp.ToArray();
         }
     }
+
     public struct BoneRenderTransform
     {
-        public float PosX, PosY, PosZ;
-        public float RotX, RotY, RotZ;
-        public float OutPosX, OutPosY, OutPosZ;
-        public float OutRotX, OutRotY, OutRotZ;
+        public float PosX { get; private set; }
+        public float PosY { get; private set; }
+        public float PosZ { get; private set; }
+
+        public float RotX { get; private set; }
+        public float RotY { get; private set; }
+        public float RotZ { get; private set; }
+
+        public float OutPosX { get; private set; }
+        public float OutPosY { get; private set; }
+        public float OutPosZ { get; private set; }
+
+        public float OutRotX { get; private set; }
+        public float OutRotY { get; private set; }
+        public float OutRotZ { get; private set; }
 
         public float[] OutPos()
         {
@@ -138,24 +145,24 @@ namespace OgfTool
             return new float[3] { OutRotX, OutRotY, OutRotZ };
         }
 
-        public static BoneRenderTransform[] Setup(XRay_Model Model, out string child_list)
+        public static BoneRenderTransform[] Setup(XRayModel Model, out string child_list)
         {
-            BoneRenderTransform[] transforms = new BoneRenderTransform[Model.bonedata.bones.Count];
-            child_list = "";
+            BoneRenderTransform[] transforms = new BoneRenderTransform[Model.BoneData.Bones.Count];
+            child_list = string.Empty;
 
-            for (int i = 0; i < Model.bonedata.bones.Count; i++)
+            for (int i = 0; i < Model.BoneData.Bones.Count; i++)
             {
                 float[] pos, rot; 
 
-                if (Model.ikdata.chunk_version == 2)
+                if (Model.IkData.ChunkVersion == 2)
                 {
-                    pos = Model.ikdata.bones[i].fixed_position;
-                    rot = Model.ikdata.bones[i].fixed_rotation;
+                    pos = Model.IkData.Bones[i].FixedPosition;
+                    rot = Model.IkData.Bones[i].FixedRotation;
                 }
                 else
                 {
-                    pos = Model.ikdata.bones[i].position;
-                    rot = Model.ikdata.bones[i].rotation;
+                    pos = Model.IkData.Bones[i].Position;
+                    rot = Model.IkData.Bones[i].Rotation;
                 }
 
                 transforms[i].PosX = pos[0];
@@ -169,11 +176,11 @@ namespace OgfTool
                 if (i != 0)
                     child_list += "-";
 
-                for (int j = 0; j < Model.bonedata.bones[i].childs_id.Count; j++)
-                    child_list += $"{Model.bonedata.bones[i].childs_id[j]},";
+                for (int j = 0; j < Model.BoneData.Bones[i].ChildsId.Count; j++)
+                    child_list += $"{Model.BoneData.Bones[i].ChildsId[j]},";
 
-                if (Model.bonedata.bones[i].parent_name != "")
-                    child_list += $"{Model.bonedata.GetBoneID(Model.bonedata.bones[i].parent_name)}";
+                if (!string.IsNullOrEmpty(Model.BoneData.Bones[i].ParentName))
+                    child_list += $"{Model.BoneData.GetBoneID(Model.BoneData.Bones[i].ParentName)}";
                 else
                     child_list += "9999";
             }

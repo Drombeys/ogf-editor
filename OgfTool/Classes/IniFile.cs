@@ -9,7 +9,7 @@ namespace OgfTool
 {
     public class IniFile   // revision 11
     {
-        private FileInfo Ini;
+        private readonly FileInfo Ini;
         private string EXE = Assembly.GetExecutingAssembly().GetName().Name;
 
         [DllImport("kernel32", CharSet = CharSet.Unicode)]

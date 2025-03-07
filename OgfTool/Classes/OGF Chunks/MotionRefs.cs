@@ -6,63 +6,65 @@ namespace OgfTool
 {
     public class MotionRefs
     {
-        public long pos;
-        public List<string> refs;
-        public bool soc;
-        public int old_size;
+        public long Pos { get; set; }
+        public List<string> Refs { get; set; }
+        public bool Soc { get; set; }
+        public int OldSize { get; set; }
 
         public MotionRefs()
         {
-            pos = 0;
-            old_size = 0;
-            refs = new List<string>();
-            soc = false;
+            Pos = 0;
+            OldSize = 0;
+            Refs = new List<string>();
+            Soc = false;
         }
 
         public void Load(XRayLoader xr_loader, bool string_refs)
         {
-            pos = xr_loader.chunk_pos;
+            Pos = xr_loader.ChunkPos;
 
             if (string_refs)
             {
-                soc = true;
-                string motions = xr_loader.read_stringZ();
-                string motion = "";
+                Soc = true;
+                string motions = xr_loader.ReadStringZ();
+                string motion = string.Empty;
                 for (int i = 0; i < motions.Length; i++)
                 {
                     if (motions[i] != ',')
+                    {
                         motion += motions[i];
+                    }
                     else
                     {
-                        refs.Add(motion);
-                        motion = "";
+                        Refs.Add(motion);
+                        motion = string.Empty;
                     }
 
                 }
 
-                if (motion != "")
-                    refs.Add(motion);
+                if (!string.IsNullOrEmpty(motion))
+                    Refs.Add(motion);
             }
             else
             {
                 uint count = xr_loader.ReadUInt32();
 
                 for (int i = 0; i < count; i++)
-                    refs.Add(xr_loader.read_stringZ());
+                    Refs.Add(xr_loader.ReadStringZ());
             }
 
-            old_size = data(soc).Length;
+            OldSize = Data(Soc).Length;
         }
 
-        public byte[] data(bool v3)
+        public byte[] Data(bool v3)
         {
             List<byte> temp = new List<byte>();
 
             if (!v3)
             {
-                temp.AddRange(BitConverter.GetBytes(refs.Count));
+                temp.AddRange(BitConverter.GetBytes(Refs.Count));
 
-                foreach (var str in refs)
+                foreach (var str in Refs)
                 {
                     temp.AddRange(Encoding.Default.GetBytes(str));
                     temp.Add(0);
@@ -70,11 +72,11 @@ namespace OgfTool
             }
             else
             {
-                string strref = refs[0];
-                if (refs.Count > 1)
+                string strref = Refs[0];
+                if (Refs.Count > 1)
                 {
-                    for (int i = 1; i < refs.Count; i++)
-                        strref += "," + refs[i];
+                    for (int i = 1; i < Refs.Count; i++)
+                        strref += "," + Refs[i];
                 }
 
                 temp.AddRange(Encoding.Default.GetBytes(strref));

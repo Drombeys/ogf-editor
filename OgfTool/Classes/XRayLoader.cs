@@ -5,49 +5,49 @@ using System.Text;
 
 namespace OgfTool
 {
-    public class XRayLoader
+    public class XRayLoader : IDisposable
     {
-        public long chunk_pos = 0;
+        public long ChunkPos { get; private set; } = 0;
 
-        uint CHUNK_COMPRESSED = 0x80000000;
+        private readonly uint CHUNK_COMPRESSED = 0x80000000;
 
-        public MemoryStream mem_stream;
-        public BinaryReader reader;
+        public MemoryStream MemStream { get; private set; }
+        public BinaryReader Reader { get; private set; }
 
 
         public void Destroy()
         {
-            mem_stream.Dispose();
-            reader.Dispose();
+            MemStream.Dispose();
+            Reader.Dispose();
         }
 
         public byte ReadByte()
         {
-            return reader.ReadByte();
+            return Reader.ReadByte();
         }
 
         public int ReadInt32()
         {
-            return reader.ReadInt32();
+            return Reader.ReadInt32();
         }
 
         public long ReadInt64()
         {
-            return reader.ReadInt64();
+            return Reader.ReadInt64();
         }
 
         public float ReadFloat()
         {
-            return reader.ReadSingle();
+            return Reader.ReadSingle();
         }
 
         public float[] ReadVector()
         {
             float[] vec = new float[3];
 
-            vec[0] = reader.ReadSingle();
-            vec[1] = reader.ReadSingle();
-            vec[2] = reader.ReadSingle();
+            vec[0] = Reader.ReadSingle();
+            vec[1] = Reader.ReadSingle();
+            vec[2] = Reader.ReadSingle();
 
             return vec;
         }
@@ -56,43 +56,43 @@ namespace OgfTool
         {
             float[] vec = new float[2];
 
-            vec[0] = reader.ReadSingle();
-            vec[1] = reader.ReadSingle();
+            vec[0] = Reader.ReadSingle();
+            vec[1] = Reader.ReadSingle();
 
             return vec;
         }
 
         public uint ReadUInt16()
         {
-            return reader.ReadUInt16();
+            return Reader.ReadUInt16();
         }
 
         public uint ReadUInt32()
         {
-            return reader.ReadUInt32();
+            return Reader.ReadUInt32();
         }
 
         public byte[] ReadBytes(int count)
         {
-            return reader.ReadBytes(count);
+            return Reader.ReadBytes(count);
         }
 
         public bool SetData(byte[] input)
         {
             if (input == null) return false;
-            mem_stream = new MemoryStream(input);
-            reader = new BinaryReader(mem_stream);
+            MemStream = new MemoryStream(input);
+            Reader = new BinaryReader(MemStream);
             return true;
         }
 
         public void SetStream(Stream stream)
         {
-            reader = new BinaryReader(stream);
+            Reader = new BinaryReader(stream);
         }
 
         public void SetReader(BinaryReader rd)
         {
-            reader = rd;
+            Reader = rd;
         }
 
         public bool find_chunk(int chunkId, bool skip = false, bool reset = false)
@@ -114,29 +114,29 @@ namespace OgfTool
 
         public uint find_chunkSize(int chunkId, bool skip = false, bool reset = false)
         {
-            chunk_pos = 0;
+            ChunkPos = 0;
 
-            if (reset) reader.BaseStream.Position = 0;
+            if (reset) Reader.BaseStream.Position = 0;
 
-            while (reader.BaseStream.Position < reader.BaseStream.Length)
+            while (Reader.BaseStream.Position < Reader.BaseStream.Length)
             {
-                if (reader.BaseStream.Position + 8 > reader.BaseStream.Length)
+                if (Reader.BaseStream.Position + 8 > Reader.BaseStream.Length)
                     return 0;
 
-                uint dwType = reader.ReadUInt32();
-                uint dwSize = reader.ReadUInt32();
+                uint dwType = Reader.ReadUInt32();
+                uint dwSize = Reader.ReadUInt32();
 
-                if ((dwType == chunkId || (dwType ^ CHUNK_COMPRESSED) == chunkId) && ( reader.BaseStream.Position - 8 + dwSize <= reader.BaseStream.Length ) )
+                if ((dwType == chunkId || (dwType ^ CHUNK_COMPRESSED) == chunkId) && ( Reader.BaseStream.Position - 8 + dwSize <= Reader.BaseStream.Length ) )
                 {
-                    chunk_pos = reader.BaseStream.Position - 8;
+                    ChunkPos = Reader.BaseStream.Position - 8;
                     return dwSize;
                 }
                 else
                 {
-                    if (reader.BaseStream.Position + dwSize < reader.BaseStream.Length)
-                        reader.BaseStream.Position += dwSize;
-                    else if (reader.BaseStream.Position + 8 < reader.BaseStream.Length)
-                        reader.BaseStream.Position += 4;
+                    if (Reader.BaseStream.Position + dwSize < Reader.BaseStream.Length)
+                        Reader.BaseStream.Position += dwSize;
+                    else if (Reader.BaseStream.Position + 8 < Reader.BaseStream.Length)
+                        Reader.BaseStream.Position += 4;
                     else
                         return 0;
                 }
@@ -148,22 +148,22 @@ namespace OgfTool
         public void open_chunk(BinaryWriter w, int chunkId)
         {
             w.Write(chunkId);
-            chunk_pos = w.BaseStream.Position;
+            ChunkPos = w.BaseStream.Position;
             w.Write(0);     // the place for 'size'
         }
 
         public void close_chunk(BinaryWriter w)
         {
-            if (chunk_pos == 0)
+            if (ChunkPos == 0)
             {
                 throw new InvalidOperationException("no chunk!");
             }
 
             long pos = w.BaseStream.Position;
-            w.BaseStream.Position = chunk_pos;
-            w.Write((int)(pos - chunk_pos - 4));
+            w.BaseStream.Position = ChunkPos;
+            w.Write((int)(pos - ChunkPos - 4));
             w.BaseStream.Position = pos;
-            chunk_pos = 0;
+            ChunkPos = 0;
         }
 
         public string read_stringData(ref bool data)
@@ -171,9 +171,9 @@ namespace OgfTool
             string str = "";
             data = false;
 
-            while (reader.BaseStream.Position < reader.BaseStream.Length)
+            while (Reader.BaseStream.Position < Reader.BaseStream.Length)
             {
-                byte[] one = { reader.ReadByte() };
+                byte[] one = { Reader.ReadByte() };
                 if (one[0] != 0 && one[0] != 0xA && one[0] != 0xD)
                 {
                     str += Encoding.Default.GetString(one);
@@ -182,7 +182,7 @@ namespace OgfTool
                 {
                     if (one[0] == 0xD)
                     {
-                        reader.ReadByte();
+                        Reader.ReadByte();
                         data = true;
                     }
                     break;
@@ -191,13 +191,13 @@ namespace OgfTool
             return str;
         }
 
-        public string read_stringZ()
+        public string ReadStringZ()
         {
-            string str = "";
+            string str = string.Empty;
 
-            while (reader.BaseStream.Position < reader.BaseStream.Length)
+            while (Reader.BaseStream.Position < Reader.BaseStream.Length)
             {
-                byte[] one = { reader.ReadByte() };
+                byte[] one = { Reader.ReadByte() };
                 if (one[0] != 0 && one[0] != 0xE)
                 {
                     str += Encoding.Default.GetString(one);
@@ -216,7 +216,7 @@ namespace OgfTool
 
             for (uint i = 0; i < size; i++)
             {
-                byte[] one = { reader.ReadByte() };
+                byte[] one = { Reader.ReadByte() };
                 str += Encoding.Default.GetString(one);
             }
             return str;
@@ -236,6 +236,11 @@ namespace OgfTool
         public void write_u32(BinaryWriter w, uint num)
         {
             w.Write(num);
+        }
+
+        public void Dispose()
+        {
+            Destroy();
         }
     }
 }

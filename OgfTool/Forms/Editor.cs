@@ -19,8 +19,8 @@ namespace OgfTool
 	public partial class Editor : Form
 	{
 		// File sytem
-		public EditorSettings pSettings = null;
-		public XRay_Model Model = null;
+		public EditorSettings pSettings { get; private set; } = null;
+		public XRayModel Model = null;
 		FolderSelectDialog SaveSklDialog = null;
 		FolderSelectDialog SyncFirstDialog = null;
 		FolderSelectDialog SyncSecondDialog = null;
@@ -31,7 +31,7 @@ namespace OgfTool
 
 		// Input
 		public bool bKeyIsDown = false;
-        string number_mask = @"^-[0-9.]*$";
+        private string number_mask = @"^-[0-9.]*$";
 		float CurrentLod = 0.0f; // 0 - HQ, 1 - LQ
 
 		Process ViewerProcess = new Process();
@@ -85,7 +85,7 @@ namespace OgfTool
 
             InitializeComponent();
 
-            Model = new XRay_Model();
+            Model = new XRayModel();
 
             if (!Directory.Exists(TempFolder()))
                 Directory.CreateDirectory(TempFolder());
@@ -258,22 +258,22 @@ namespace OgfTool
                 SaveMenuParam.Enabled = true;
 				saveAsToolStripMenuItem.Enabled = true;
 
-                OpenInObjectEditor.Enabled = !Model.Is(XRay_Model.ModelFormat.eDM);
-                importDataFromModelToolStripMenuItem.Enabled = !Model.Is(XRay_Model.ModelFormat.eDM);
-                recalcNormalsToolStripMenuItem.Enabled = !Model.Is(XRay_Model.ModelFormat.eDM);
-                recalcBoundingBoxToolStripMenuItem.Enabled = !Model.Is(XRay_Model.ModelFormat.eDM);
-                moveRotateModelToolStripMenuItem.Enabled = !Model.Is(XRay_Model.ModelFormat.eDM);
-                converterToolStripMenuItem.Enabled = !Model.Is(XRay_Model.ModelFormat.eDM);
+                OpenInObjectEditor.Enabled = !Model.Is(XRayModel.ModelFormat.eDM);
+                importDataFromModelToolStripMenuItem.Enabled = !Model.Is(XRayModel.ModelFormat.eDM);
+                recalcNormalsToolStripMenuItem.Enabled = !Model.Is(XRayModel.ModelFormat.eDM);
+                recalcBoundingBoxToolStripMenuItem.Enabled = !Model.Is(XRayModel.ModelFormat.eDM);
+                moveRotateModelToolStripMenuItem.Enabled = !Model.Is(XRayModel.ModelFormat.eDM);
+                converterToolStripMenuItem.Enabled = !Model.Is(XRayModel.ModelFormat.eDM);
                 removeProgressiveMeshesToolStripMenuItem.Enabled = LodMenuItem.Enabled = Model.IsProgressive();
 
                 exportToolStripMenuItem.Enabled = true;
 				bonesToolStripMenuItem.Enabled = Model.Header.IsSkeleton();
-                oGFToolStripMenuItem.Enabled = !Model.Is(XRay_Model.ModelFormat.eOGF);
+                oGFToolStripMenuItem.Enabled = !Model.Is(XRayModel.ModelFormat.eOGF);
                 AddMeshesMenuItem.Enabled = Model.Header.IsSkeleton();
-                OgfInfo.Enabled = !Model.Is(XRay_Model.ModelFormat.eDM);
-				showBonesToolStripMenuItem.Enabled = Model.bonedata != null && Model.ikdata != null;
-				objectToolStripMenuItem.Enabled = !Model.Is(XRay_Model.ModelFormat.eDetail);
-				dMToolStripMenuItem.Enabled = !Model.Is(XRay_Model.ModelFormat.eDM);
+                OgfInfo.Enabled = !Model.Is(XRayModel.ModelFormat.eDM);
+				showBonesToolStripMenuItem.Enabled = Model.BoneData != null && Model.IkData != null;
+				objectToolStripMenuItem.Enabled = !Model.Is(XRayModel.ModelFormat.eDetail);
+				dMToolStripMenuItem.Enabled = !Model.Is(XRayModel.ModelFormat.eDM);
 
                 OpenOGFDialog.InitialDirectory = Model.FileName.Substring(0, Model.FileName.LastIndexOf('\\'));
                 OpenDMDialog.InitialDirectory = Model.FileName.Substring(0, Model.FileName.LastIndexOf('\\'));
@@ -303,9 +303,9 @@ namespace OgfTool
                 CurrentLod = 0;
             }
 
-            omfToolStripMenuItem.Enabled = Model.motions.data() != null;
-            sklToolStripMenuItem.Enabled = Model.motions.data() != null;
-            sklsToolStripMenuItem.Enabled = Model.motions.data() != null;
+            omfToolStripMenuItem.Enabled = Model.Motions.Data() != null;
+            sklToolStripMenuItem.Enabled = Model.Motions.Data() != null;
+            sklsToolStripMenuItem.Enabled = Model.Motions.Data() != null;
 
             // Textures
             TabControl.Controls.Add(TexturesPage);
@@ -320,7 +320,7 @@ namespace OgfTool
 				CreateUserdataButton.Visible = false;
 				UserDataBox.Visible = false;
 
-				if (Model.userdata != null)
+				if (Model.UserData != null)
 					UserDataBox.Visible = true;
 				else
 					CreateUserdataButton.Visible = true;
@@ -333,7 +333,7 @@ namespace OgfTool
 				CreateMotionRefsButton.Visible = false;
 				MotionRefsBox.Visible = false;
 
-				if (Model.motion_refs != null)
+				if (Model.MotionRefs != null)
 					MotionRefsBox.Visible = true;
 				else
 					CreateMotionRefsButton.Visible = true;
@@ -342,11 +342,11 @@ namespace OgfTool
 				TabControl.Controls.Add(MotionPage);
 				MotionBox.Text = "";
 
-				if (Model.motions.data() != null)
+				if (Model.Motions.Data() != null)
 				{
 					AppendOMFButton.Visible = false;
 					MotionBox.Visible = true;
-                    MotionBox.Text = Model.motions.ToString();
+                    MotionBox.Text = Model.Motions.ToString();
                 }
 				else
 				{
@@ -355,64 +355,64 @@ namespace OgfTool
 				}
 
 				// Bones
-				if (Model.bonedata != null)
+				if (Model.BoneData != null)
 				{
 					BoneNamesBox.Clear();
 					TabControl.Controls.Add(BoneNamesPage);
 
-					BoneNamesBox.Text += $"Bones count : {Model.bonedata.bones.Count}\n\n";
-					for (int i = 0; i < Model.bonedata.bones.Count; i++)
+					BoneNamesBox.Text += $"Bones count : {Model.BoneData.Bones.Count}\n\n";
+					for (int i = 0; i < Model.BoneData.Bones.Count; i++)
 					{
-						BoneNamesBox.Text += $"{i + 1}. {Model.bonedata.bones[i].name}";
+						BoneNamesBox.Text += $"{i + 1}. {Model.BoneData.Bones[i].Name}";
 
-						if (i != Model.bonedata.bones.Count - 1)
+						if (i != Model.BoneData.Bones.Count - 1)
 							BoneNamesBox.Text += "\n";
 					}
 
                     // Ik Data
-                    if (Model.ikdata != null)
+                    if (Model.IkData != null)
 					{
 						TabControl.Controls.Add(BoneParamsPage);
 
-						for (int i = Model.bonedata.bones.Count - 1; i >= 0; i--)
+						for (int i = Model.BoneData.Bones.Count - 1; i >= 0; i--)
 						{
-							CreateBoneGroupBox(i, Model.bonedata.bones[i].name, Model.bonedata.bones[i].parent_name, Model.ikdata.bones[i].material, Model.ikdata.bones[i].mass, Model.ikdata.bones[i].center_mass, Model.ikdata.bones[i].position, Model.ikdata.bones[i].rotation);
+							CreateBoneGroupBox(i, Model.BoneData.Bones[i].Name, Model.BoneData.Bones[i].ParentName, Model.IkData.Bones[i].Material, Model.IkData.Bones[i].Mass, Model.IkData.Bones[i].CenterMass, Model.IkData.Bones[i].Position, Model.IkData.Bones[i].Rotation);
 						}
                     }
 				}
 
 				// Lod
-				if (Model.Header.format_version == 4)
+				if (Model.Header.FormatVersion == 4)
 					TabControl.Controls.Add(LodPage);
 
-				if (Model.lod != null)
+				if (Model.Lod != null)
 				{
 					CreateLodButton.Visible = false;
-					LodPathBox.Text = Model.lod.lod_path;
+					LodPathBox.Text = Model.Lod.LodPath;
 				}
 				else
 					CreateLodButton.Visible = true;
 			}
 
-            for (int i = Model.childs.Count - 1; i >= 0; i--)
+            for (int i = Model.Childs.Count - 1; i >= 0; i--)
 			{
 				CreateTextureGroupBox(i);
 
 				var TextureGroupBox = TexturesPage.Controls["TextureGrpBox_" + i.ToString()];
-                TextureGroupBox.Controls["textureBox_" + i.ToString()].Text = Model.childs[i].m_texture;
-                TextureGroupBox.Controls["shaderBox_" + i.ToString()].Text = Model.childs[i].m_shader;
+                TextureGroupBox.Controls["textureBox_" + i.ToString()].Text = Model.Childs[i].Texture;
+                TextureGroupBox.Controls["shaderBox_" + i.ToString()].Text = Model.Childs[i].Shader;
 			}
 
             MotionRefsBox.Clear();
 			UserDataBox.Clear();
 
-			if (Model.motion_refs != null)
-				MotionRefsBox.Lines = Model.motion_refs.refs.ToArray();
+			if (Model.MotionRefs != null)
+				MotionRefsBox.Lines = Model.MotionRefs.Refs.ToArray();
 
-			if (Model.userdata != null)
-				UserDataBox.Text = Model.userdata.userdata;
+			if (Model.UserData != null)
+				UserDataBox.Text = Model.UserData.Userdata;
 
-			if (main_file && !Model.Is(XRay_Model.ModelFormat.eDM))
+			if (main_file && !Model.Is(XRayModel.ModelFormat.eDM))
 			{
 				LabelBroken.Text = "Broken type: " + Model.BrokenType.ToString();
 				LabelBroken.Visible = Model.BrokenType > 0;
@@ -428,40 +428,40 @@ namespace OgfTool
 
 		private void ApplyParams()
 		{
-			if (Model.motion_refs != null)
+			if (Model.MotionRefs != null)
 			{
-                Model.motion_refs.refs.Clear();
+                Model.MotionRefs.Refs.Clear();
 
 				if (IsTextCorrect(MotionRefsBox.Text))
 				{
 					for (int i = 0; i < MotionRefsBox.Lines.Count(); i++)
 					{
 						if (IsTextCorrect(MotionRefsBox.Lines[i]))
-                            Model.motion_refs.refs.Add(GetCorrectString(MotionRefsBox.Lines[i]));
+                            Model.MotionRefs.Refs.Add(GetCorrectString(MotionRefsBox.Lines[i]));
 					}
 				}
 			}
 
-			if (Model.userdata != null)
+			if (Model.UserData != null)
 			{
-                Model.userdata.userdata = "";
+                Model.UserData.Userdata = "";
 
 				if (IsTextCorrect(UserDataBox.Text))
 				{
 					for (int i = 0; i < UserDataBox.Lines.Count(); i++)
 					{
 						string ext = i == UserDataBox.Lines.Count() - 1 ? "" : "\r\n";
-                        Model.userdata.userdata += UserDataBox.Lines[i] + ext;
+                        Model.UserData.Userdata += UserDataBox.Lines[i] + ext;
 					}
 				}
 			}
 
-			if (Model.lod != null)
+			if (Model.Lod != null)
 			{
-                Model.lod.lod_path = "";
+                Model.Lod.LodPath = "";
 
 				if (IsTextCorrect(LodPathBox.Text))
-                    Model.lod.lod_path = GetCorrectString(LodPathBox.Text);
+                    Model.Lod.LodPath = GetCorrectString(LodPathBox.Text);
 			}
 
 			UpdateModelType();
@@ -469,7 +469,7 @@ namespace OgfTool
 
 		private bool CheckMeshes()
 		{
-			foreach (var ch in Model.childs)
+			foreach (var ch in Model.Childs)
 			{
 				if (!ch.to_delete)
 					return true;
@@ -493,21 +493,21 @@ namespace OgfTool
 			switch (currentField)
 			{
 				case "DeleteButton":
-					if (Model.Is(XRay_Model.ModelFormat.eDM))
+					if (Model.Is(XRayModel.ModelFormat.eDM))
 					{
                         OpenDMDialog.FileName = "";
                         if (OpenDMDialog.ShowDialog() == DialogResult.OK)
                         {
-                            XRay_Model DM = new XRay_Model();
+                            XRayModel DM = new XRayModel();
                             if (DM.OpenFile(OpenDMDialog.FileName))
                             {
-								OGF_Child old_child = Model.childs[idx];
-                                Model.childs[idx] = DM.childs[0];
-								Model.childs[idx].SetLocalOffsetMain(old_child.GetLocalOffsetMain());
+								OgfChild old_child = Model.Childs[idx];
+                                Model.Childs[idx] = DM.Childs[0];
+								Model.Childs[idx].SetLocalOffsetMain(old_child.GetLocalOffsetMain());
 
                                 var TextureGroupBox = TexturesPage.Controls["TextureGrpBox_" + idx.ToString()];
-                                TextureGroupBox.Controls["textureBox_" + idx.ToString()].Text = Model.childs[idx].m_texture;
-                                TextureGroupBox.Controls["shaderBox_" + idx.ToString()].Text = Model.childs[idx].m_shader;
+                                TextureGroupBox.Controls["textureBox_" + idx.ToString()].Text = Model.Childs[idx].Texture;
+                                TextureGroupBox.Controls["shaderBox_" + idx.ToString()].Text = Model.Childs[idx].Shader;
                                 RecalcMeshInfo();
                                 ReloadViewPort();
                             }
@@ -515,9 +515,9 @@ namespace OgfTool
                     }
 					else
 					{
-						Model.childs[idx].to_delete = !Model.childs[idx].to_delete;
+						Model.Childs[idx].to_delete = !Model.Childs[idx].to_delete;
 
-						if (Model.childs[idx].to_delete)
+						if (Model.Childs[idx].to_delete)
 						{
 							curBox.Text = "Return Mesh";
 							curBox.BackColor = Color.FromArgb(255, 255, 128, 128);
@@ -532,32 +532,32 @@ namespace OgfTool
 					}
                     break;
                 case "MoveButton":
-					float[] old_offs = Model.childs[idx].GetLocalOffset();
-                    float[] old_rot = Model.childs[idx].GetLocalRotation();
-                    bool old_rot_flag = Model.childs[idx].GetLocalRotationFlag();
+					float[] old_offs = Model.Childs[idx].GetLocalOffset();
+                    float[] old_rot = Model.Childs[idx].GetLocalRotation();
+                    bool old_rot_flag = Model.Childs[idx].GetLocalRotationFlag();
 
                     MoveMesh moveMesh = new MoveMesh(old_offs, old_rot, old_rot_flag, true);
 					moveMesh.ShowDialog();
 
 					if (moveMesh.res)
 					{
-                        Model.childs[idx].SetLocalOffset(moveMesh.offset);
-                        Model.childs[idx].SetLocalRotation(moveMesh.rotation, Model.childs[idx].Header.bs.c, moveMesh.LocalRotation);
+                        Model.Childs[idx].SetLocalOffset(moveMesh.offset);
+                        Model.Childs[idx].SetLocalRotation(moveMesh.rotation, Model.Childs[idx].Header.BSphere.Center, moveMesh.LocalRotation);
                     }
 
-					if (!FVec.Similar(old_offs, Model.childs[idx].GetLocalOffset()) || !FVec.Similar(old_rot, Model.childs[idx].GetLocalRotation()) || old_rot_flag != Model.childs[idx].GetLocalRotationFlag())
+					if (!FVec.Similar(old_offs, Model.Childs[idx].GetLocalOffset()) || !FVec.Similar(old_rot, Model.Childs[idx].GetLocalRotation()) || old_rot_flag != Model.Childs[idx].GetLocalRotationFlag())
 					{
-						if (!Model.Is(XRay_Model.ModelFormat.eDM))
+						if (!Model.Is(XRayModel.ModelFormat.eDM))
 							Model.RecalcBBox(true);
                         ReloadViewPort(true, false, true);
 					}
                     break;
                 case "DataButton":
-					DmData dmData = new DmData(Model.childs[idx].min_scale, Model.childs[idx].max_scale, Model.childs[idx].m_flags);
+					DmData dmData = new DmData(Model.Childs[idx].MinScale, Model.Childs[idx].MaxScale, Model.Childs[idx].Flags);
 					dmData.ShowDialog();
-					Model.childs[idx].min_scale = dmData.fMinScale;
-					Model.childs[idx].max_scale = dmData.fMaxScale;
-					Model.childs[idx].m_flags = dmData.iFlags;
+					Model.Childs[idx].MinScale = dmData.fMinScale;
+					Model.Childs[idx].MaxScale = dmData.fMaxScale;
+					Model.Childs[idx].Flags = dmData.iFlags;
                     break;
             }
 		}
@@ -571,8 +571,8 @@ namespace OgfTool
 
 			switch (currentField)
 			{
-				case "textureBox": Model.childs[idx].m_texture = curBox.Text; break;
-				case "shaderBox": Model.childs[idx].m_shader = curBox.Text; break;
+				case "textureBox": Model.Childs[idx].Texture = curBox.Text; break;
+				case "shaderBox": Model.Childs[idx].Shader = curBox.Text; break;
 			}
 		}
 
@@ -583,16 +583,16 @@ namespace OgfTool
 
             switch (currentField)
             {
-                case "MassBox": control.Text = ((decimal)Model.ikdata.bones[idx].mass).ToString(); break;
-                case "CenterBoxX": control.Text = ((decimal)Model.ikdata.bones[idx].center_mass[0]).ToString(); break;
-                case "CenterBoxY": control.Text = ((decimal)Model.ikdata.bones[idx].center_mass[1]).ToString(); break;
-                case "CenterBoxZ": control.Text = ((decimal)Model.ikdata.bones[idx].center_mass[2]).ToString(); break;
-                case "PositionX": control.Text = ((decimal)Model.ikdata.bones[idx].position[0]).ToString(); break;
-                case "PositionY": control.Text = ((decimal)Model.ikdata.bones[idx].position[1]).ToString(); break;
-                case "PositionZ": control.Text = ((decimal)Model.ikdata.bones[idx].position[2]).ToString(); break;
-                case "RotationX": control.Text = ((decimal)Model.ikdata.bones[idx].rotation[0]).ToString(); break;
-                case "RotationY": control.Text = ((decimal)Model.ikdata.bones[idx].rotation[1]).ToString(); break;
-                case "RotationZ": control.Text = ((decimal)Model.ikdata.bones[idx].rotation[2]).ToString(); break;
+                case "MassBox": control.Text = ((decimal)Model.IkData.Bones[idx].Mass).ToString(); break;
+                case "CenterBoxX": control.Text = ((decimal)Model.IkData.Bones[idx].CenterMass[0]).ToString(); break;
+                case "CenterBoxY": control.Text = ((decimal)Model.IkData.Bones[idx].CenterMass[1]).ToString(); break;
+                case "CenterBoxZ": control.Text = ((decimal)Model.IkData.Bones[idx].CenterMass[2]).ToString(); break;
+                case "PositionX": control.Text = ((decimal)Model.IkData.Bones[idx].Position[0]).ToString(); break;
+                case "PositionY": control.Text = ((decimal)Model.IkData.Bones[idx].Position[1]).ToString(); break;
+                case "PositionZ": control.Text = ((decimal)Model.IkData.Bones[idx].Position[2]).ToString(); break;
+                case "RotationX": control.Text = ((decimal)Model.IkData.Bones[idx].Rotation[0]).ToString(); break;
+                case "RotationY": control.Text = ((decimal)Model.IkData.Bones[idx].Rotation[1]).ToString(); break;
+                case "RotationZ": control.Text = ((decimal)Model.IkData.Bones[idx].Rotation[2]).ToString(); break;
 			}
 
 			if (control is TextBox)
@@ -652,43 +652,43 @@ namespace OgfTool
 				{
 					case "boneBox":
 						{
-                            Model.bonedata.bones[idx].name = curControl.Text;
+                            Model.BoneData.Bones[idx].Name = curControl.Text;
 
-							for (int j = 0; j < Model.bonedata.bones[idx].childs_id.Count; j++)
+							for (int j = 0; j < Model.BoneData.Bones[idx].ChildsId.Count; j++)
 							{
-								int child_id = Model.bonedata.bones[idx].childs_id[j];
+								int child_id = Model.BoneData.Bones[idx].ChildsId[j];
 								var MainGroup = BoneParamsPage.Controls["BoneGrpBox_" + child_id.ToString()];
-                                Model.bonedata.bones[child_id].parent_name = curControl.Text;
-								MainGroup.Controls["ParentboneBox_" + child_id.ToString()].Text = Model.bonedata.bones[child_id].parent_name;
+                                Model.BoneData.Bones[child_id].ParentName = curControl.Text;
+								MainGroup.Controls["ParentboneBox_" + child_id.ToString()].Text = Model.BoneData.Bones[child_id].ParentName;
 							}
 
 							BoneNamesBox.Clear();
-							BoneNamesBox.Text += $"Bones count : {Model.bonedata.bones.Count}\n\n";
+							BoneNamesBox.Text += $"Bones count : {Model.BoneData.Bones.Count}\n\n";
 
-							for (int i = 0; i < Model.bonedata.bones.Count; i++)
+							for (int i = 0; i < Model.BoneData.Bones.Count; i++)
 							{
-								BoneNamesBox.Text += $"{i + 1}. {Model.bonedata.bones[i].name}";
-								if (i != Model.bonedata.bones.Count - 1)
+								BoneNamesBox.Text += $"{i + 1}. {Model.BoneData.Bones[i].Name}";
+								if (i != Model.BoneData.Bones.Count - 1)
 									BoneNamesBox.Text += "\n";
 							}
                             if (ViewPortBones)
 								ViewPortNeedReload = true;
                         }
 						break;
-					case "MaterialBox": Model.ikdata.bones[idx].material = curControl.Text; break;
-					case "MassBox": Model.ikdata.bones[idx].mass = Convert.ToSingle(curControl.Text); break;
-					case "CenterBoxX": Model.ikdata.bones[idx].center_mass[0] = Convert.ToSingle(curControl.Text); break;
-					case "CenterBoxY": Model.ikdata.bones[idx].center_mass[1] = Convert.ToSingle(curControl.Text); break;
-					case "CenterBoxZ": Model.ikdata.bones[idx].center_mass[2] = Convert.ToSingle(curControl.Text); break;
-					case "PositionX": Model.ikdata.bones[idx].position[0] = Convert.ToSingle(curControl.Text); need_recalc_bones = true; break;
-					case "PositionY": Model.ikdata.bones[idx].position[1] = Convert.ToSingle(curControl.Text); need_recalc_bones = true; break;
-					case "PositionZ": Model.ikdata.bones[idx].position[2] = Convert.ToSingle(curControl.Text); need_recalc_bones = true; break;
-					case "RotationX": Model.ikdata.bones[idx].rotation[0] = Convert.ToSingle(curControl.Text); need_recalc_bones = true; break;
-					case "RotationY": Model.ikdata.bones[idx].rotation[1] = Convert.ToSingle(curControl.Text); need_recalc_bones = true; break;
-					case "RotationZ": Model.ikdata.bones[idx].rotation[2] = Convert.ToSingle(curControl.Text); need_recalc_bones = true; break;
+					case "MaterialBox": Model.IkData.Bones[idx].Material = curControl.Text; break;
+					case "MassBox": Model.IkData.Bones[idx].Mass = Convert.ToSingle(curControl.Text); break;
+					case "CenterBoxX": Model.IkData.Bones[idx].CenterMass[0] = Convert.ToSingle(curControl.Text); break;
+					case "CenterBoxY": Model.IkData.Bones[idx].CenterMass[1] = Convert.ToSingle(curControl.Text); break;
+					case "CenterBoxZ": Model.IkData.Bones[idx].CenterMass[2] = Convert.ToSingle(curControl.Text); break;
+					case "PositionX": Model.IkData.Bones[idx].Position[0] = Convert.ToSingle(curControl.Text); need_recalc_bones = true; break;
+					case "PositionY": Model.IkData.Bones[idx].Position[1] = Convert.ToSingle(curControl.Text); need_recalc_bones = true; break;
+					case "PositionZ": Model.IkData.Bones[idx].Position[2] = Convert.ToSingle(curControl.Text); need_recalc_bones = true; break;
+					case "RotationX": Model.IkData.Bones[idx].Rotation[0] = Convert.ToSingle(curControl.Text); need_recalc_bones = true; break;
+					case "RotationY": Model.IkData.Bones[idx].Rotation[1] = Convert.ToSingle(curControl.Text); need_recalc_bones = true; break;
+					case "RotationZ": Model.IkData.Bones[idx].Rotation[2] = Convert.ToSingle(curControl.Text); need_recalc_bones = true; break;
 				}
 
-				if (need_recalc_bones && (ViewPortBones || Model.ikdata != null && Model.ikdata.chunk_version == 2)) // Если показываем кости или загружен старый меш зависящий от костей
+				if (need_recalc_bones && (ViewPortBones || Model.IkData != null && Model.IkData.ChunkVersion == 2)) // Если показываем кости или загружен старый меш зависящий от костей
 					ViewPortNeedReload = true;
             }
 
@@ -734,16 +734,16 @@ namespace OgfTool
 			OgfInfo Info = new OgfInfo(Model, IsTextCorrect(MotionRefsBox.Text), CurrentLod);
             Info.ShowDialog();
 
-			if (Info.res && Model.description != null)
+			if (Info.res && Model.Description != null)
 			{
-				Model.description.m_source = Info.descr.m_source;
-				Model.description.m_export_tool = Info.descr.m_export_tool;
-				Model.description.m_owner_name = Info.descr.m_owner_name;
-				Model.description.m_export_modif_name_tool = Info.descr.m_export_modif_name_tool;
-				Model.description.m_creation_time = Info.descr.m_creation_time;
-				Model.description.m_export_time = Info.descr.m_export_time;
-				Model.description.m_modified_time = Info.descr.m_modified_time;
-                Model.description.four_byte = Info.descr.four_byte;
+				Model.Description.Source = Info.descr.Source;
+				Model.Description.ExportTool = Info.descr.ExportTool;
+				Model.Description.OwnerName = Info.descr.OwnerName;
+				Model.Description.ExportModifNameTool = Info.descr.ExportModifNameTool;
+				Model.Description.CreationTime = Info.descr.CreationTime;
+				Model.Description.ExportTime = Info.descr.ExportTime;
+				Model.Description.ModifiedTime = Info.descr.ModifiedTime;
+                Model.Description.FourByte = Info.descr.FourByte;
 			}
 
 			System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
@@ -759,17 +759,17 @@ namespace OgfTool
 
 			ExportFormat fmt = ExportFormat.Unknown;
 
-			if (Model.Is(XRay_Model.ModelFormat.eDetail))
+			if (Model.Is(XRayModel.ModelFormat.eDetail))
 			{
 				SaveAsDialog.Filter = "Detail file|*.details";
 				fmt = ExportFormat.Detail;
 			}
-			else if (Model.Is(XRay_Model.ModelFormat.eDM))
+			else if (Model.Is(XRayModel.ModelFormat.eDM))
 			{
 				SaveAsDialog.Filter = "DM file|*.dm";
 				fmt = ExportFormat.DM;
 			}
-			else if (Model.Is(XRay_Model.ModelFormat.eOGF))
+			else if (Model.Is(XRayModel.ModelFormat.eOGF))
 			{
 				SaveAsDialog.Filter = "OGF file|*.ogf";
 				fmt = ExportFormat.OGF;
@@ -811,9 +811,9 @@ namespace OgfTool
                     break;
                 case ExportFormat.DM:
 					int cnt = 0, idx = 0;
-					for (int i = 0; i < Model.childs.Count; i++)
+					for (int i = 0; i < Model.Childs.Count; i++)
 					{
-						if (!Model.childs[i].to_delete)
+						if (!Model.Childs[i].to_delete)
 						{
 							cnt++;
 							idx = i;
@@ -827,11 +827,11 @@ namespace OgfTool
                     }
 
                     ApplyParams();
-                    DmData dmData = new DmData(Model.childs[idx].min_scale, Model.childs[idx].max_scale, Model.childs[idx].m_flags);
+                    DmData dmData = new DmData(Model.Childs[idx].MinScale, Model.Childs[idx].MaxScale, Model.Childs[idx].Flags);
                     dmData.ShowDialog();
-                    Model.childs[idx].min_scale = dmData.fMinScale;
-                    Model.childs[idx].max_scale = dmData.fMaxScale;
-                    Model.childs[idx].m_flags = dmData.iFlags;
+                    Model.Childs[idx].MinScale = dmData.fMinScale;
+                    Model.Childs[idx].MaxScale = dmData.fMaxScale;
+                    Model.Childs[idx].Flags = dmData.iFlags;
                     Model.SaveDM(filename, idx, BkpCheckBox.Checked);
                     break;
                 case ExportFormat.Obj:
@@ -974,19 +974,19 @@ namespace OgfTool
 			CreateUserdataButton.Visible = false;
 			UserDataBox.Visible = true;
 			UserDataBox.Clear();
-			if (Model.userdata == null)
-                Model.userdata = new UserData();
+			if (Model.UserData == null)
+                Model.UserData = new UserData();
 		}
 
         private void CreateMotionRefsButton_Click(object sender, EventArgs e)
         {
-			if (Model.motions.data() == null || Model.motions.data() != null && MessageBox.Show("New motion refs chunk will remove built-in motions, continue?", "OGF Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+			if (Model.Motions.Data() == null || Model.Motions.Data() != null && MessageBox.Show("New motion refs chunk will remove built-in motions, continue?", "OGF Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
 			{
 				// Чистим все связанное со встроенными анимами
 				MotionBox.Clear();
 				MotionBox.Visible = false;
 				AppendOMFButton.Visible = true;
-                Model.motions.SetData(null);
+                Model.Motions.SetData(null);
 
 				// Обновляем тип модели
 				UpdateModelType();
@@ -997,8 +997,8 @@ namespace OgfTool
 				MotionRefsBox.Visible = true;
 				MotionRefsBox.Clear();
 
-				if (Model.motion_refs == null)
-                    Model.motion_refs = new MotionRefs();
+				if (Model.MotionRefs == null)
+                    Model.MotionRefs = new MotionRefs();
 			}
 		}
 
@@ -1006,8 +1006,8 @@ namespace OgfTool
 		{
 			CreateLodButton.Visible = false;
 			LodPathBox.Clear();
-			if (Model.lod == null)
-                Model.lod = new Lod();
+			if (Model.Lod == null)
+                Model.Lod = new Lod();
 		}
 
 		private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1069,21 +1069,21 @@ namespace OgfTool
 					{
                         for (int i = 0; i < BoneParamsPage.Controls.Count; i++)
 						{
-							if (Model.ikdata == null || Model.ikdata.bones.Count <= i)
+							if (Model.IkData == null || Model.IkData.Bones.Count <= i)
 								break;
 
 							GroupBox box = BoneParamsPage.Controls["BoneGrpBox_" + i.ToString()] as GroupBox;
 							TableLayoutPanel layoutPanel = box.Controls["LayoutPanel_" + i.ToString()] as TableLayoutPanel;
-							(layoutPanel.Controls["PositionX_" + i.ToString()] as TextBox).Text = ((decimal)Model.ikdata.bones[i].position[0]).ToString();
-							(layoutPanel.Controls["PositionY_" + i.ToString()] as TextBox).Text = ((decimal)Model.ikdata.bones[i].position[1]).ToString();
-							(layoutPanel.Controls["PositionZ_" + i.ToString()] as TextBox).Text = ((decimal)Model.ikdata.bones[i].position[2]).ToString();
-							(layoutPanel.Controls["RotationX_" + i.ToString()] as TextBox).Text = ((decimal)Model.ikdata.bones[i].rotation[0]).ToString();
-							(layoutPanel.Controls["RotationY_" + i.ToString()] as TextBox).Text = ((decimal)Model.ikdata.bones[i].rotation[1]).ToString();
-							(layoutPanel.Controls["RotationZ_" + i.ToString()] as TextBox).Text = ((decimal)Model.ikdata.bones[i].rotation[2]).ToString();
-                            (layoutPanel.Controls["CenterBoxX_" + i.ToString()] as TextBox).Text = ((decimal)Model.ikdata.bones[i].center_mass[0]).ToString();
-                            (layoutPanel.Controls["CenterBoxY_" + i.ToString()] as TextBox).Text = ((decimal)Model.ikdata.bones[i].center_mass[1]).ToString();
-                            (layoutPanel.Controls["CenterBoxZ_" + i.ToString()] as TextBox).Text = ((decimal)Model.ikdata.bones[i].center_mass[2]).ToString();
-                            (layoutPanel.Controls["MassBox_" + i.ToString()] as TextBox).Text = ((decimal)Model.ikdata.bones[i].mass).ToString();
+							(layoutPanel.Controls["PositionX_" + i.ToString()] as TextBox).Text = ((decimal)Model.IkData.Bones[i].Position[0]).ToString();
+							(layoutPanel.Controls["PositionY_" + i.ToString()] as TextBox).Text = ((decimal)Model.IkData.Bones[i].Position[1]).ToString();
+							(layoutPanel.Controls["PositionZ_" + i.ToString()] as TextBox).Text = ((decimal)Model.IkData.Bones[i].Position[2]).ToString();
+							(layoutPanel.Controls["RotationX_" + i.ToString()] as TextBox).Text = ((decimal)Model.IkData.Bones[i].Rotation[0]).ToString();
+							(layoutPanel.Controls["RotationY_" + i.ToString()] as TextBox).Text = ((decimal)Model.IkData.Bones[i].Rotation[1]).ToString();
+							(layoutPanel.Controls["RotationZ_" + i.ToString()] as TextBox).Text = ((decimal)Model.IkData.Bones[i].Rotation[2]).ToString();
+                            (layoutPanel.Controls["CenterBoxX_" + i.ToString()] as TextBox).Text = ((decimal)Model.IkData.Bones[i].CenterMass[0]).ToString();
+                            (layoutPanel.Controls["CenterBoxY_" + i.ToString()] as TextBox).Text = ((decimal)Model.IkData.Bones[i].CenterMass[1]).ToString();
+                            (layoutPanel.Controls["CenterBoxZ_" + i.ToString()] as TextBox).Text = ((decimal)Model.IkData.Bones[i].CenterMass[2]).ToString();
+                            (layoutPanel.Controls["MassBox_" + i.ToString()] as TextBox).Text = ((decimal)Model.IkData.Bones[i].Mass).ToString();
 						}
 						break;
 					}
@@ -1119,7 +1119,7 @@ namespace OgfTool
 
             using (var fileStream = new FileStream(Filename, FileMode.OpenOrCreate))
             {
-                fileStream.Write(Model.motions.data(), 0, Model.motions.data().Length);
+                fileStream.Write(Model.Motions.Data(), 0, Model.Motions.Data().Length);
 				fileStream.Close();
             }
 
@@ -1140,7 +1140,7 @@ namespace OgfTool
         {
             MotionBox.Visible = false;
             AppendOMFButton.Visible = true;
-            Model.motions.SetData(null);
+            Model.Motions.SetData(null);
             MotionBox.Clear();
             UpdateModelType();
             UpdateModelFormat();
@@ -1148,7 +1148,7 @@ namespace OgfTool
 
         private void AppendOMFButton_Click(object sender, EventArgs e)
         {
-			if (!IsTextCorrect(MotionRefsBox.Text) && (Model.motion_refs == null || Model.motion_refs.refs.Count() == 0) || (IsTextCorrect(MotionRefsBox.Text) || Model.motion_refs != null && Model.motion_refs.refs.Count() > 0) && MessageBox.Show("Build-in motions will remove motion refs, continue?", "OGF Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+			if (!IsTextCorrect(MotionRefsBox.Text) && (Model.MotionRefs == null || Model.MotionRefs.Refs.Count() == 0) || (IsTextCorrect(MotionRefsBox.Text) || Model.MotionRefs != null && Model.MotionRefs.Refs.Count() > 0) && MessageBox.Show("Build-in motions will remove motion refs, continue?", "OGF Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
 				OpenOMFDialog.ShowDialog();
         }
 
@@ -1159,7 +1159,7 @@ namespace OgfTool
 
             byte[] OpenedOmf = File.ReadAllBytes(OpenOMFDialog.FileName);
 
-			if (Model.motions.SetData(OpenedOmf))
+			if (Model.Motions.SetData(OpenedOmf))
 			{
                 // Апдейтим визуал встроенных анимаций
                 AppendOMFButton.Visible = false;
@@ -1167,10 +1167,10 @@ namespace OgfTool
 
                 // Чистим встроенные рефы, интерфейс почистится сам при активации вкладки
                 MotionRefsBox.Clear();
-                if (Model.motion_refs != null)
-                    Model.motion_refs.refs.Clear();
+                if (Model.MotionRefs != null)
+                    Model.MotionRefs.Refs.Clear();
 
-                MotionBox.Text = Model.motions.ToString();
+                MotionBox.Text = Model.Motions.ToString();
             }
 
 			UpdateModelType();
@@ -1184,7 +1184,7 @@ namespace OgfTool
 			{
 				bool Update = false;
 
-				XRay_Model SecondOgf = new XRay_Model();
+				XRayModel SecondOgf = new XRayModel();
 				if (SecondOgf.OpenFile(OpenOGFDialog.FileName))
 				{
 					AutoClosingMessageBox.Show("Can't import OGF Model!", "Error", 1000, MessageBoxIcon.Error);
@@ -1201,10 +1201,10 @@ namespace OgfTool
 					{
 						if (Params.Textures)
 						{
-							for (int i = 0; i < Model.childs.Count; i++)
+							for (int i = 0; i < Model.Childs.Count; i++)
 							{
-                                Model.childs[i].m_texture = SecondOgf.childs[i].m_texture;
-                                Model.childs[i].m_shader = SecondOgf.childs[i].m_shader;
+                                Model.Childs[i].Texture = SecondOgf.Childs[i].Texture;
+                                Model.Childs[i].Shader = SecondOgf.Childs[i].Shader;
 							}
 
 							Update = true;
@@ -1212,71 +1212,71 @@ namespace OgfTool
 
 						if (Params.Userdata)
 						{
-							if (Model.userdata == null)
-                                Model.userdata = new UserData();
+							if (Model.UserData == null)
+                                Model.UserData = new UserData();
 
-                            Model.userdata.userdata = SecondOgf.userdata.userdata;
-                            Model.userdata.old_format = SecondOgf.userdata.old_format;
+                            Model.UserData.Userdata = SecondOgf.UserData.Userdata;
+                            Model.UserData.OldFormat = SecondOgf.UserData.OldFormat;
 
                             Update = true;
 						}
-						else if (Params.Remove && Model.userdata != null)
+						else if (Params.Remove && Model.UserData != null)
 						{
-                            Model.userdata.userdata = "";
+                            Model.UserData.Userdata = "";
 							Update = true;
 						}
 
 						if (Params.Lod)
 						{
-							if (Model.lod == null)
-                                Model.lod = new Lod();
+							if (Model.Lod == null)
+                                Model.Lod = new Lod();
 
-                            Model.lod.lod_path = SecondOgf.lod.lod_path;
+                            Model.Lod.LodPath = SecondOgf.Lod.LodPath;
 
 							Update = true;
 						}
-						else if (Params.Remove && Model.lod != null)
+						else if (Params.Remove && Model.Lod != null)
 						{
-                            Model.lod.lod_path = "";
+                            Model.Lod.LodPath = "";
 							Update = true;
 						}
 
 						if (Params.MotionRefs)
 						{
-							if (Model.motion_refs == null)
-                                Model.motion_refs = new MotionRefs();
+							if (Model.MotionRefs == null)
+                                Model.MotionRefs = new MotionRefs();
 
-                            Model.motion_refs.refs = SecondOgf.motion_refs.refs;
+                            Model.MotionRefs.Refs = SecondOgf.MotionRefs.Refs;
 
 							Update = true;
 						}
-						else if (Params.Remove && Model.motion_refs != null)
+						else if (Params.Remove && Model.MotionRefs != null)
 						{
-                            Model.motion_refs.refs.Clear();
+                            Model.MotionRefs.Refs.Clear();
 							Update = true;
 						}
 
 						if (Params.Motions)
 						{
-                            Model.motions.SetData(SecondOgf.motions.data());
+                            Model.Motions.SetData(SecondOgf.Motions.Data());
 
-							if (Model.motion_refs != null)
-                                Model.motion_refs.refs.Clear();
+							if (Model.MotionRefs != null)
+                                Model.MotionRefs.Refs.Clear();
 
 							Update = true;
 						}
 						else if (Params.Remove)
 						{
-                            Model.motions.SetData(null);
+                            Model.Motions.SetData(null);
 							Update = true;
 						}
 
 						if (Params.Materials)
 						{
-							for (int i = 0; i < Model.bonedata.bones.Count; i++)
+							for (int i = 0; i < Model.BoneData.Bones.Count; i++)
 							{
-								Model.ikdata.bones[i].material = SecondOgf.ikdata.bones[i].material;
-                                Model.ikdata.bones[i].mass = SecondOgf.ikdata.bones[i].mass;
+								Model.IkData.Bones[i].Material = SecondOgf.IkData.Bones[i].Material;
+                                Model.IkData.Bones[i].Mass = SecondOgf.IkData.Bones[i].Mass;
 							}
 
 							Update = true;
@@ -1318,22 +1318,22 @@ namespace OgfTool
         {
 			if (!Model.Opened) return;
 
-			if (Model.bonedata == null)
-                Model.Header.Static(Model.childs);
-			else if (Model.motions.data() != null || IsTextCorrect(MotionRefsBox.Text))
+			if (Model.BoneData == null)
+                Model.Header.Static(Model.Childs);
+			else if (Model.Motions.Data() != null || IsTextCorrect(MotionRefsBox.Text))
                 Model.Header.Animated();
 			else
                 Model.Header.Skeleton();
 
 			// Апдейтим экспорт аним тут, т.к. при любом изменении омф вызывается эта функция
-			omfToolStripMenuItem.Enabled = Model.motions.data() != null;
-			sklToolStripMenuItem.Enabled = Model.motions.data() != null;
-			sklsToolStripMenuItem.Enabled = Model.motions.data() != null;
+			omfToolStripMenuItem.Enabled = Model.Motions.Data() != null;
+			sklToolStripMenuItem.Enabled = Model.Motions.Data() != null;
+			sklsToolStripMenuItem.Enabled = Model.Motions.Data() != null;
 		}
 
 		private void UpdateModelFormat()
 		{
-			CurrentFormat.Enabled = (Model.Opened && !Model.Is(XRay_Model.ModelFormat.eDM) && Model.Header.IsSkeleton());
+			CurrentFormat.Enabled = (Model.Opened && !Model.Is(XRayModel.ModelFormat.eDM) && Model.Header.IsSkeleton());
 
 			if (!CurrentFormat.Enabled)
 			{
@@ -1343,10 +1343,10 @@ namespace OgfTool
 
 			uint links = 0;
 
-			foreach (var ch in Model.childs)
+			foreach (var ch in Model.Childs)
 				links = Math.Max(links, ch.links);
 
-            Model.IsCopModel = (IsTextCorrect(MotionRefsBox.Text) && Model.motion_refs != null && !Model.motion_refs.soc || !IsTextCorrect(MotionRefsBox.Text)) && links < 0x12071980;
+            Model.IsCopModel = (IsTextCorrect(MotionRefsBox.Text) && Model.MotionRefs != null && !Model.MotionRefs.Soc || !IsTextCorrect(MotionRefsBox.Text)) && links < 0x12071980;
 
 			CurrentFormat.Text = (Model.IsCopModel ? strings.CoPFormat : strings.SoCFormat);
 		}
@@ -1375,7 +1375,7 @@ namespace OgfTool
 				File.Delete(Filename);
 
             ApplyParams();
-            XRay_Model temp_model = new XRay_Model();
+            XRayModel temp_model = new XRayModel();
 			temp_model.Copy(Model);
 			temp_model.FileName = Filename;
 
@@ -1438,12 +1438,12 @@ namespace OgfTool
 
         private void RecalcMeshInfo()
         {
-            for (int idx = 0; idx < Model.childs.Count; idx++)
+            for (int idx = 0; idx < Model.Childs.Count; idx++)
             {
                 Control Mesh = TexturesPage.Controls["TextureGrpBox_" + idx.ToString()];
 
                 Label FaceLbl = (Label)Mesh.Controls["FacesLbl_" + idx.ToString()];
-				string NewFaceText = FaceLabel.Text + Model.childs[idx].Faces_SWI(CurrentLod).Count.ToString();
+				string NewFaceText = FaceLabel.Text + Model.Childs[idx].Faces_SWI(CurrentLod).Count.ToString();
 				int FaceLocationDiff = NewFaceText.Length - FaceLbl.Text.Length;
 
                 FaceLbl.Text = NewFaceText;
@@ -1451,7 +1451,7 @@ namespace OgfTool
                 FaceLbl.Location = new Point(FaceLbl.Location.X - (FaceLocationDiff * 6), FaceLbl.Location.Y);
 
                 Label VertsLbl = (Label)Mesh.Controls["VertsLbl_" + idx.ToString()];
-                string NewVertsText = VertsLabel.Text + Model.childs[idx].Vertices.Count.ToString();
+                string NewVertsText = VertsLabel.Text + Model.Childs[idx].Vertices.Count.ToString();
                 int VertsLocationDiff = NewVertsText.Length - VertsLbl.Text.Length;
 
                 VertsLbl.Text = NewVertsText;
@@ -1463,7 +1463,7 @@ namespace OgfTool
                 if (Model.Header != null && Model.Header.IsSkeleton())
 				{
 					Label LinksLbl = (Label)Mesh.Controls["LinksLbl_" + idx.ToString()];
-                    string NewLinksText = LinksLabel.Text + Model.childs[idx].LinksCount().ToString();
+                    string NewLinksText = LinksLabel.Text + Model.Childs[idx].LinksCount().ToString();
                     LinksLocationDiff = NewVertsText.Length - VertsLbl.Text.Length;
 
                     LinksLbl.Text = NewLinksText;
@@ -1471,10 +1471,10 @@ namespace OgfTool
 					LinksLbl.Location = new Point(LinksLbl.Location.X - (LinksLocationDiff * 6) - (VertsLocationDiff * 6) - (FaceLocationDiff * 6), LinksLbl.Location.Y);
 				}
 
-				if (Model.childs[idx].SWI.Count > 0)
+				if (Model.Childs[idx].SWI.Count > 0)
 				{
 					Label LodsLbl = (Label)Mesh.Controls["LodsLbl_" + idx.ToString()];
-					string NewLodsText = LodLabel.Text + Model.childs[idx].SWI.Count.ToString();
+					string NewLodsText = LodLabel.Text + Model.Childs[idx].SWI.Count.ToString();
                     int LodsLocationDiff = NewVertsText.Length - VertsLbl.Text.Length;
 
                     LodsLbl.Text = NewLodsText;
@@ -1495,7 +1495,7 @@ namespace OgfTool
 			{
                 Model.RemoveProgressive(CurrentLod);
 
-				for (int idx = 0; idx < Model.childs.Count; idx++)
+				for (int idx = 0; idx < Model.Childs.Count; idx++)
 				{
 					Control Mesh = TexturesPage.Controls["TextureGrpBox_" + idx.ToString()];
 					Label FaceLbl = (Label)Mesh.Controls["LodsLbl_" + idx.ToString()];
@@ -1513,25 +1513,25 @@ namespace OgfTool
         {
 			if (Model == null) return;
 
-            float[] old_offs = Model.local_offset;
-            float[] old_rot = Model.local_rotation;
+            float[] old_offs = Model.LocalOffset;
+            float[] old_rot = Model.LocalRotation;
 
             MoveMesh moveMesh = new MoveMesh(old_offs, old_rot, false, false);
             moveMesh.ShowDialog();
 
 			if (moveMesh.res)
 			{
-                Model.local_offset = moveMesh.offset;
-                Model.local_rotation = moveMesh.rotation;
+                Model.LocalOffset = moveMesh.offset;
+                Model.LocalRotation = moveMesh.rotation;
 
-                for (int i = 0; i < Model.childs.Count; i++)
+                for (int i = 0; i < Model.Childs.Count; i++)
 				{
-                    Model.childs[i].SetLocalOffsetMain(Model.local_offset);
-                    Model.childs[i].SetLocalRotationMain(Model.local_rotation);
+                    Model.Childs[i].SetLocalOffsetMain(Model.LocalOffset);
+                    Model.Childs[i].SetLocalRotationMain(Model.LocalRotation);
 				}
             }
 
-            if (!FVec.Similar(old_offs, Model.local_offset) || !FVec.Similar(old_rot, Model.local_rotation))
+            if (!FVec.Similar(old_offs, Model.LocalOffset) || !FVec.Similar(old_rot, Model.LocalRotation))
             {
                 Model.RecalcBBox(true);
                 ReloadViewPort(true, false, true);
@@ -1543,35 +1543,37 @@ namespace OgfTool
 			List<string> materials = new List<string>();
 
 			if (File.Exists(filename))
-			{
-				var xr_loader = new XRayLoader();
-				using (var r = new BinaryReader(new FileStream(filename, FileMode.Open)))
-				{
-					xr_loader.SetStream(r.BaseStream);
-					xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk((int)MTL.GAMEMTLS_CHUNK_MTLS, false, true));
+            {
+                using (var xr_loader = new XRayLoader())
+                {
+                    using (var r = new BinaryReader(new FileStream(filename, FileMode.Open)))
+                    {
+                        xr_loader.SetStream(r.BaseStream);
+                        xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk((int)MTL.GAMEMTLS_CHUNK_MTLS, false, true));
 
-					int id = 0;
-					uint size;
+                        int id = 0;
+                        uint size;
 
-					while (true)
-					{
-						if (!xr_loader.find_chunk(id)) break;
+                        while (true)
+                        {
+                            if (!xr_loader.find_chunk(id)) break;
 
-						Stream temp = xr_loader.reader.BaseStream;
+                            Stream temp = xr_loader.Reader.BaseStream;
 
-						if (!xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk(id, false, true))) break;
+                            if (!xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk(id, false, true))) break;
 
-						size = xr_loader.find_chunkSize((int)MTL.GAMEMTL_CHUNK_MAIN);
-						if (size == 0) break;
-						xr_loader.ReadBytes(4);
-						materials.Add(xr_loader.read_stringZ());
+                            size = xr_loader.find_chunkSize((int)MTL.GAMEMTL_CHUNK_MAIN);
+                            if (size == 0) break;
+                            xr_loader.ReadBytes(4);
+                            materials.Add(xr_loader.ReadStringZ());
 
-						id++;
-						xr_loader.SetStream(temp);
-					}
-				}
-			}
-			string[] ret = materials.ToArray();
+                            id++;
+                            xr_loader.SetStream(temp);
+                        }
+                    }
+                }
+            }
+            string[] ret = materials.ToArray();
 			Array.Sort(ret);
 			return ret;
 		}
@@ -1580,17 +1582,17 @@ namespace OgfTool
 		{
 			game_materials = GameMtlParser(filename);
 
-			if (Model.Opened && Model.bonedata != null)
+			if (Model.Opened && Model.BoneData != null)
 			{
 				BoneParamsPage.Controls.Clear();
-				for (int i = 0; i < Model.bonedata.bones.Count; i++)
+				for (int i = 0; i < Model.BoneData.Bones.Count; i++)
 				{
-					CreateBoneGroupBox(i, Model.bonedata.bones[i].name, Model.bonedata.bones[i].parent_name, Model.ikdata.bones[i].material, Model.ikdata.bones[i].mass, Model.ikdata.bones[i].center_mass, Model.ikdata.bones[i].position, Model.ikdata.bones[i].rotation);
+					CreateBoneGroupBox(i, Model.BoneData.Bones[i].Name, Model.BoneData.Bones[i].ParentName, Model.IkData.Bones[i].Material, Model.IkData.Bones[i].Mass, Model.IkData.Bones[i].CenterMass, Model.IkData.Bones[i].Position, Model.IkData.Bones[i].Rotation);
 				}
 			}
 		}
 
-		string CheckNaN(float val)
+        private string CheckNaN(float val)
         {
 			if (val.ToString() == "NaN")
 				return "0";
@@ -1741,26 +1743,26 @@ namespace OgfTool
 			OpenOGFDialog.FileName = "";
             if (OpenOGFDialog.ShowDialog() == DialogResult.OK)
 			{
-                XRay_Model SecondModel = new XRay_Model();
+                XRayModel SecondModel = new XRayModel();
                 SecondModel.OpenFile(OpenOGFDialog.FileName);
 
 				if (SecondModel.Header.IsSkeleton())
 				{
-					int old_childs_count = Model.childs.Count;
+					int old_childs_count = Model.Childs.Count;
 
 					AddMesh addMeshDialog = new AddMesh(ref Model, SecondModel);
 					addMeshDialog.ShowDialog();
 
-					if (addMeshDialog.res && old_childs_count != Model.childs.Count)
+					if (addMeshDialog.Res && old_childs_count != Model.Childs.Count)
 					{
 						TexturesPage.Controls.Clear();
-						for (int i = Model.childs.Count - 1; i >= 0; i--)
+						for (int i = Model.Childs.Count - 1; i >= 0; i--)
 						{
 							CreateTextureGroupBox(i);
 
 							var TextureGroupBox = TexturesPage.Controls["TextureGrpBox_" + i.ToString()];
-							TextureGroupBox.Controls["textureBox_" + i.ToString()].Text = Model.childs[i].m_texture; ;
-							TextureGroupBox.Controls["shaderBox_" + i.ToString()].Text = Model.childs[i].m_shader;
+							TextureGroupBox.Controls["textureBox_" + i.ToString()].Text = Model.Childs[i].Texture; ;
+							TextureGroupBox.Controls["shaderBox_" + i.ToString()].Text = Model.Childs[i].Shader;
 						}
 
                         Model.RecalcBBox(false);
@@ -1773,41 +1775,45 @@ namespace OgfTool
 
         private void recalcNormalsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (Model.Opened)
+            if (!Model.Opened)
             {
-				SelectMeshes selectMeshes = new SelectMeshes(Model);
-				selectMeshes.ShowDialog();
+                return;
+            }
 
-				if (selectMeshes.res && selectMeshes.MeshChecked.Count == Model.childs.Count)
-				{
-                    bool Reloaded = false;
+            SelectMeshes selectMeshes = new SelectMeshes(Model);
+            selectMeshes.ShowDialog();
 
-                    for (int i = 0; i < Model.childs.Count; i++)
-                    {
-						if (selectMeshes.MeshChecked[i])
-						{
-							Reloaded = true;
-                            Model.childs[i].MeshNormalize();
-						}
-                    }
+            if (!selectMeshes.res || selectMeshes.MeshChecked.Count != Model.Childs.Count)
+            {
+                return;
+            }
 
-					if (Reloaded)
-					{
-                        ReloadViewPort(true, false, true);
-                        AutoClosingMessageBox.Show("Mesh normals recalculated!", "Info", 1000, MessageBoxIcon.Information);
-					}
-					else
-                        AutoClosingMessageBox.Show("Mesh normals don't changed!", "Warning", 1000, MessageBoxIcon.Warning);
+            bool Reloaded = false;
+
+            for (int i = 0; i < Model.Childs.Count; i++)
+            {
+                if (selectMeshes.MeshChecked[i])
+                {
+                    Reloaded = true;
+                    Model.Childs[i].MeshNormalize();
                 }
             }
+
+            if (Reloaded)
+            {
+                ReloadViewPort(true, false, true);
+                AutoClosingMessageBox.Show("Mesh normals recalculated!", "Info", 1000, MessageBoxIcon.Information);
+            }
+            else
+                AutoClosingMessageBox.Show("Mesh normals don't changed!", "Warning", 1000, MessageBoxIcon.Warning);
         }
 
         private void openImageFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string image_path = "";
+            string image_path = string.Empty;
             pSettings.Load("ImagePath", ref image_path);
 
-            if (image_path != "" && Directory.Exists(image_path))
+            if (!string.IsNullOrEmpty(image_path) && Directory.Exists(image_path))
             {
                 Process PrFolder = new Process();
                 ProcessStartInfo psi = new ProcessStartInfo();
@@ -1848,17 +1854,17 @@ namespace OgfTool
                 Model.ChangeParent("root_stalker", "bip01_pelvis");
                 Model.ChangeParent("bip01", "bip01_pelvis");
 
-                Model.bonedata.bones[0].parent_name = "";
-                Model.bonedata.RecalcChilds();
+                Model.BoneData.Bones[0].ParentName = "";
+                Model.BoneData.RecalcChilds();
 
-                for (int i = 0; i < Model.bonedata.bones.Count; i++)
+                for (int i = 0; i < Model.BoneData.Bones.Count; i++)
 				{
-                    Model.ikdata.bones[i].position = Resources.SoCSkeleton.Pos(i);
-                    Model.ikdata.bones[i].rotation = Resources.SoCSkeleton.Rot(i);
-                    Model.ikdata.bones[i].center_mass = FVec.RotateXYZ(Model.ikdata.bones[i].center_mass, 0.0f, 180.0f, 0.0f);
+                    Model.IkData.Bones[i].Position = Resources.SoCSkeleton.Pos(i);
+                    Model.IkData.Bones[i].Rotation = Resources.SoCSkeleton.Rot(i);
+                    Model.IkData.Bones[i].CenterMass = FVec.RotateXYZ(Model.IkData.Bones[i].CenterMass, 0.0f, 180.0f, 0.0f);
 				}
 
-                foreach (var ch in Model.childs)
+                foreach (var ch in Model.Childs)
 				{
 					uint links = ch.LinksCount();
 
@@ -1867,7 +1873,7 @@ namespace OgfTool
 						for (int j = 0; j < links; j++)
 							ch.Vertices[i].bones_id[j] = (ch.Vertices[i].bones_id[j] >= 2 ? ch.Vertices[i].bones_id[j] - 2 : 0);
 
-						ch.Vertices[i].offs = FVec.RotateXYZ(ch.Vertices[i].offs, 0.0f, 180.0f, 0.0f);
+						ch.Vertices[i].Offs = FVec.RotateXYZ(ch.Vertices[i].Offs, 0.0f, 180.0f, 0.0f);
                         ch.Vertices[i].local_offset = FVec.RotateXYZ(ch.Vertices[i].local_offset, 0.0f, 180.0f, 0.0f);
                         ch.Vertices[i].norm = FVec.RotateXYZ(ch.Vertices[i].norm, 0.0f, 180.0f, 0.0f);
 						ch.Vertices[i].tang = FVec.RotateXYZ(ch.Vertices[i].tang, 0.0f, 180.0f, 0.0f);
@@ -1890,24 +1896,24 @@ namespace OgfTool
                 Model.AddBone("root_stalker", "", 0);
                 Model.AddBone("bip01", "root_stalker", 1);
 
-                Model.bonedata.bones[2].parent_name = "bip01";
-                Model.bonedata.RecalcChilds();
+                Model.BoneData.Bones[2].ParentName = "bip01";
+                Model.BoneData.RecalcChilds();
 
-                for (int i = 0; i < Model.bonedata.bones.Count; i++)
+                for (int i = 0; i < Model.BoneData.Bones.Count; i++)
                 {
-                    Model.ikdata.bones[i].position = Resources.CoPSkeleton.Pos(i);
-                    Model.ikdata.bones[i].rotation = Resources.CoPSkeleton.Rot(i);
-                    Model.ikdata.bones[i].center_mass = FVec.RotateXYZ(Model.ikdata.bones[i].center_mass, 0.0f, 180.0f, 0.0f);
+                    Model.IkData.Bones[i].Position = Resources.CoPSkeleton.Pos(i);
+                    Model.IkData.Bones[i].Rotation = Resources.CoPSkeleton.Rot(i);
+                    Model.IkData.Bones[i].CenterMass = FVec.RotateXYZ(Model.IkData.Bones[i].CenterMass, 0.0f, 180.0f, 0.0f);
                 }
 
-                foreach (var ch in Model.childs)
+                foreach (var ch in Model.Childs)
                 {
                     for (int i = 0; i < ch.Vertices.Count; i++)
                     {
                         for (int j = 0; j < ch.LinksCount(); j++)
                             ch.Vertices[i].bones_id[j] = ch.Vertices[i].bones_id[j] + 2;
 
-                        ch.Vertices[i].offs = FVec.RotateXYZ(ch.Vertices[i].offs, 0.0f, 180.0f, 0.0f);
+                        ch.Vertices[i].Offs = FVec.RotateXYZ(ch.Vertices[i].Offs, 0.0f, 180.0f, 0.0f);
                         ch.Vertices[i].local_offset = FVec.RotateXYZ(ch.Vertices[i].local_offset, 0.0f, 180.0f, 0.0f);
                         ch.Vertices[i].norm = FVec.RotateXYZ(ch.Vertices[i].norm, 0.0f, 180.0f, 0.0f);
                         ch.Vertices[i].tang = FVec.RotateXYZ(ch.Vertices[i].tang, 0.0f, 180.0f, 0.0f);
@@ -1931,7 +1937,7 @@ namespace OgfTool
 				{
 					if (Model.Header.IsSkeleton())
 					{
-						if (Model.bonedata.bones.Count == 47 && Model.bonedata.GetBoneID("root_stalker") != -1)
+						if (Model.BoneData.Bones.Count == 47 && Model.BoneData.GetBoneID("root_stalker") != -1)
 							return true;
 					}
 				}
@@ -1939,7 +1945,7 @@ namespace OgfTool
 				{
 					if (Model.Header.IsSkeleton())
 					{
-						if (Model.bonedata.bones.Count == 45 && Model.bonedata.GetBoneID("bip01_pelvis") != -1 && Model.bonedata.GetBoneID("root_stalker") == -1)
+						if (Model.BoneData.Bones.Count == 45 && Model.BoneData.GetBoneID("bip01_pelvis") != -1 && Model.BoneData.GetBoneID("root_stalker") == -1)
 							return true;
 					}
 				}
@@ -1972,56 +1978,56 @@ namespace OgfTool
 						string SecondFile = SecondFilesList[j].Replace(SecondSubFolder, "");
 						if (FirstFile == SecondFile)
 						{
-                            XRay_Model SourceModel = new XRay_Model();
-                            XRay_Model DestModel = new XRay_Model();
+                            XRayModel SourceModel = new XRayModel();
+                            XRayModel DestModel = new XRayModel();
 							if (SourceModel.OpenFile(FirstFilesList[i]) && DestModel.OpenFile(SecondFilesList[j]))
 							{
 								bool Changed = false;
-								if (DestModel.motion_refs != null)
+								if (DestModel.MotionRefs != null)
 								{
-									if (SourceModel.motion_refs == null)
-										SourceModel.motion_refs = new MotionRefs();
+									if (SourceModel.MotionRefs == null)
+										SourceModel.MotionRefs = new MotionRefs();
 
-									if (SourceModel.motion_refs.refs != DestModel.motion_refs.refs)
+									if (SourceModel.MotionRefs.Refs != DestModel.MotionRefs.Refs)
 									{
-										bool tolstyak_exists = SourceModel.motion_refs.refs.Contains("actors\\tolstyak_animation");
-										SourceModel.motion_refs.refs = DestModel.motion_refs.refs;
+										bool tolstyak_exists = SourceModel.MotionRefs.Refs.Contains("actors\\tolstyak_animation");
+										SourceModel.MotionRefs.Refs = DestModel.MotionRefs.Refs;
 										if (tolstyak_exists)
-											SourceModel.motion_refs.refs.Add("actors\\tolstyak_animation");
+											SourceModel.MotionRefs.Refs.Add("actors\\tolstyak_animation");
 										Changed = true;
 									}
 								}
-								else if (SourceModel.motion_refs != null)
+								else if (SourceModel.MotionRefs != null)
 								{
-									SourceModel.motion_refs.refs.Clear();
+									SourceModel.MotionRefs.Refs.Clear();
                                     Changed = true;
                                 }
 
-								if (DestModel.userdata != null)
+								if (DestModel.UserData != null)
 								{
-									if (SourceModel.userdata == null)
-										SourceModel.userdata = new UserData();
+									if (SourceModel.UserData == null)
+										SourceModel.UserData = new UserData();
 
-									if (SourceModel.userdata.userdata != DestModel.userdata.userdata)
+									if (SourceModel.UserData.Userdata != DestModel.UserData.Userdata)
 									{
-										SourceModel.userdata.userdata = DestModel.userdata.userdata;
+										SourceModel.UserData.Userdata = DestModel.UserData.Userdata;
 										Changed = true;
 									}
 								}
-								else if (SourceModel.userdata != null)
+								else if (SourceModel.UserData != null)
 								{
-									SourceModel.userdata.userdata = "";
+									SourceModel.UserData.Userdata = "";
                                     Changed = true;
                                 }
 
-								//if (DestModel.motions != null)
+								//if (DestModel.Motions != null)
 								//{
-								//	if (SourceModel.motions != DestModel.motions)
+								//	if (SourceModel.Motions != DestModel.Motions)
 								//	{
-								//		SourceModel.motions = DestModel.motions;
+								//		SourceModel.Motions = DestModel.Motions;
 
-								//		if (SourceModel.motion_refs != null && SourceModel.motion_refs.refs.Count > 0)
-								//			SourceModel.motion_refs.refs.Clear();
+								//		if (SourceModel.MotionRefs != null && SourceModel.MotionRefs.refs.Count > 0)
+								//			SourceModel.MotionRefs.refs.Clear();
         //                                Changed = true;
         //                            }
         //                        }
@@ -2109,10 +2115,10 @@ namespace OgfTool
 					List<string> pTextures = new List<string>();
 					List<string> pConvertTextures = new List<string>();
 
-					for (int i = 0; i < Model.childs.Count; i++)
+					for (int i = 0; i < Model.Childs.Count; i++)
 					{
-						string texture_main = Textures + "\\" + Model.childs[i].m_texture + ".dds";
-						string texture_temp = TempFolder() + "\\" + Path.GetFileName(Model.childs[i].m_texture + ".png");
+						string texture_main = Textures + "\\" + Model.Childs[i].Texture + ".dds";
+						string texture_temp = TempFolder() + "\\" + Path.GetFileName(Model.Childs[i].Texture + ".png");
 
 						if (File.Exists(texture_temp) && !force_texture_reload)
 							continue;
@@ -2126,7 +2132,7 @@ namespace OgfTool
 					{
 						if (File.Exists(pTextures[i]) && (!File.Exists(pTextures[i + 1]) || force_texture_reload))
 						{
-							if (Model.childs[chld].to_delete)
+							if (Model.Childs[chld].to_delete)
 								continue;
 
 							pConvertTextures.Add(pTextures[i]);
@@ -2137,12 +2143,12 @@ namespace OgfTool
 					}
 
 					OldChildVisible.Clear();
-					foreach (var ch in Model.childs)
+					foreach (var ch in Model.Childs)
 						OldChildVisible.Add(ch.to_delete);
 
 					OldChildTextures.Clear();
-					foreach (var ch in Model.childs)
-						OldChildTextures.Add(ch.m_texture);
+					foreach (var ch in Model.Childs)
+						OldChildTextures.Add(ch.Texture);
 
 					if (pConvertTextures.Count > 0)
 					{
@@ -2172,11 +2178,11 @@ namespace OgfTool
                     string ConverterArgs = "";
 					int TexturesCount = 0;
 
-					for (int i = 0; i < Model.bonedata.bones.Count; i++)
+					for (int i = 0; i < Model.BoneData.Bones.Count; i++)
 					{
-                        if (File.Exists($"{TempFolder()}\\{Model.bonedata.bones[i].GetNotNullName()}.png"))
+                        if (File.Exists($"{TempFolder()}\\{Model.BoneData.Bones[i].GetNotNullName()}.png"))
 							continue;
-						ConverterArgs += $" \"{Model.bonedata.bones[i].name}\" \"{TempFolder()}\\{Model.bonedata.bones[i].GetNotNullName()}.png\"";
+						ConverterArgs += $" \"{Model.BoneData.Bones[i].Name}\" \"{TempFolder()}\\{Model.BoneData.Bones[i].GetNotNullName()}.png\"";
 						TexturesCount++;
                     }
 					
@@ -2281,14 +2287,14 @@ namespace OgfTool
 
 		private bool CheckViewportModelVers()
         {
-            if (OldChildTextures.Count != Model.childs.Count || OldChildVisible.Count != Model.childs.Count) return false;
+            if (OldChildTextures.Count != Model.Childs.Count || OldChildVisible.Count != Model.Childs.Count) return false;
 
 			if (OldChildTextures.Count != 0)
             {
 				int i = 0;
-				foreach (var ch in Model.childs)
+				foreach (var ch in Model.Childs)
 				{
-					if (ch.m_texture != OldChildTextures[i])
+					if (ch.Texture != OldChildTextures[i])
 						return false;
 					i++;
 				}
@@ -2297,7 +2303,7 @@ namespace OgfTool
 			if (OldChildVisible.Count != 0)
 			{
 				int i = 0;
-				foreach (var ch in Model.childs)
+				foreach (var ch in Model.Childs)
 				{
 					if (ch.to_delete != OldChildVisible[i])
 						return false;
@@ -2417,9 +2423,9 @@ namespace OgfTool
 			newButton.Name = "DeleteButton_" + idx;
 			newButton.Click += new System.EventHandler(this.ButtonFilter);
 			newButton.Anchor = AnchorStyles.Left | AnchorStyles.Top;
-			newButton.Text = Model.Is(XRay_Model.ModelFormat.eDM) ? "Replace" : newButton.Text;
+			newButton.Text = Model.Is(XRayModel.ModelFormat.eDM) ? "Replace" : newButton.Text;
 
-            if (Model.childs[idx].to_delete)
+            if (Model.Childs[idx].to_delete)
             {
                 newButton.Text = "Return Mesh";
                 newButton.BackColor = Color.FromArgb(255, 255, 128, 128);
@@ -2445,7 +2451,7 @@ namespace OgfTool
 			box.Controls.Add(newButton);
             box.Controls.Add(newButton2);
 
-			if (Model.Is(XRay_Model.ModelFormat.eDM))
+			if (Model.Is(XRayModel.ModelFormat.eDM))
 				box.Controls.Add(newButton3);
         }
 
@@ -2459,27 +2465,27 @@ namespace OgfTool
 
 			var newLbl3 = Copy.Label(FaceLabel);
 			newLbl3.Name = "FacesLbl_" + idx;
-			newLbl3.Text = FaceLabel.Text + Model.childs[idx].Faces_SWI(CurrentLod).Count.ToString();
-			newLbl3.Size = new Size(FaceLabel.Size.Width + (Model.childs[idx].Faces_SWI(CurrentLod).Count.ToString().Length * 6), FaceLabel.Size.Height);
-			newLbl3.Location = new Point(FaceLabel.Location.X - (Model.childs[idx].Faces_SWI(CurrentLod).Count.ToString().Length * 6), FaceLabel.Location.Y);
+			newLbl3.Text = FaceLabel.Text + Model.Childs[idx].Faces_SWI(CurrentLod).Count.ToString();
+			newLbl3.Size = new Size(FaceLabel.Size.Width + (Model.Childs[idx].Faces_SWI(CurrentLod).Count.ToString().Length * 6), FaceLabel.Size.Height);
+			newLbl3.Location = new Point(FaceLabel.Location.X - (Model.Childs[idx].Faces_SWI(CurrentLod).Count.ToString().Length * 6), FaceLabel.Location.Y);
 
             var newLbl4 = Copy.Label(VertsLabel);
 			newLbl4.Name = "VertsLbl_" + idx;
-			newLbl4.Text = VertsLabel.Text + Model.childs[idx].Vertices.Count.ToString();
-			newLbl4.Size = new Size(VertsLabel.Size.Width + (Model.childs[idx].Vertices.Count.ToString().Length * 6), VertsLabel.Size.Height);
-			newLbl4.Location = new Point(VertsLabel.Location.X - (Model.childs[idx].Vertices.Count.ToString().Length * 6) - (Model.childs[idx].Faces_SWI(CurrentLod).Count.ToString().Length * 6), VertsLabel.Location.Y);
+			newLbl4.Text = VertsLabel.Text + Model.Childs[idx].Vertices.Count.ToString();
+			newLbl4.Size = new Size(VertsLabel.Size.Width + (Model.Childs[idx].Vertices.Count.ToString().Length * 6), VertsLabel.Size.Height);
+			newLbl4.Location = new Point(VertsLabel.Location.X - (Model.Childs[idx].Vertices.Count.ToString().Length * 6) - (Model.Childs[idx].Faces_SWI(CurrentLod).Count.ToString().Length * 6), VertsLabel.Location.Y);
 
 			var newLbl5 = Copy.Label(LinksLabel);
 			newLbl5.Name = "LinksLbl_" + idx;
-			newLbl5.Text = LinksLabel.Text + Model.childs[idx].LinksCount().ToString();
-			newLbl5.Size = new Size(LinksLabel.Size.Width + (Model.childs[idx].LinksCount().ToString().Length * 6), LinksLabel.Size.Height);
-			newLbl5.Location = new Point(LinksLabel.Location.X - (Model.childs[idx].Vertices.Count.ToString().Length * 6) - (Model.childs[idx].Faces_SWI(CurrentLod).Count.ToString().Length * 6) - (Model.childs[idx].LinksCount().ToString().Length * 6), LinksLabel.Location.Y);
+			newLbl5.Text = LinksLabel.Text + Model.Childs[idx].LinksCount().ToString();
+			newLbl5.Size = new Size(LinksLabel.Size.Width + (Model.Childs[idx].LinksCount().ToString().Length * 6), LinksLabel.Size.Height);
+			newLbl5.Location = new Point(LinksLabel.Location.X - (Model.Childs[idx].Vertices.Count.ToString().Length * 6) - (Model.Childs[idx].Faces_SWI(CurrentLod).Count.ToString().Length * 6) - (Model.Childs[idx].LinksCount().ToString().Length * 6), LinksLabel.Location.Y);
 
 			var newLbl6 = Copy.Label(LodLabel);
 			newLbl6.Name = "LodsLbl_" + idx;
-			newLbl6.Text = LodLabel.Text + Model.childs[idx].SWI.Count.ToString();
-			newLbl6.Size = new Size(LodLabel.Size.Width + (Model.childs[idx].SWI.Count.ToString().Length * 6), LodLabel.Size.Height);
-			newLbl6.Location = new Point(LodLabel.Location.X - (Model.childs[idx].Vertices.Count.ToString().Length * 6) - (Model.childs[idx].Faces_SWI(CurrentLod).Count.ToString().Length * 6) - (Model.childs[idx].LinksCount().ToString().Length * 6) - (Model.childs[idx].SWI.Count.ToString().Length * 6), LodLabel.Location.Y);
+			newLbl6.Text = LodLabel.Text + Model.Childs[idx].SWI.Count.ToString();
+			newLbl6.Size = new Size(LodLabel.Size.Width + (Model.Childs[idx].SWI.Count.ToString().Length * 6), LodLabel.Size.Height);
+			newLbl6.Location = new Point(LodLabel.Location.X - (Model.Childs[idx].Vertices.Count.ToString().Length * 6) - (Model.Childs[idx].Faces_SWI(CurrentLod).Count.ToString().Length * 6) - (Model.Childs[idx].LinksCount().ToString().Length * 6) - (Model.Childs[idx].SWI.Count.ToString().Length * 6), LodLabel.Location.Y);
 
 			box.Controls.Add(newLbl);
 			box.Controls.Add(newLbl2);
@@ -2489,7 +2495,7 @@ namespace OgfTool
 			if (Model.Header.IsSkeleton())
 				box.Controls.Add(newLbl5);
 
-			if (Model.childs[idx].SWI.Count > 0)
+			if (Model.Childs[idx].SWI.Count > 0)
 				box.Controls.Add(newLbl6);
 		}
 

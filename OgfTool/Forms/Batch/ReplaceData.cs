@@ -37,7 +37,7 @@ namespace OgfTool
 
                 for (int i = 0; i < files.Length; i++)
                 {
-                    XRay_Model Model = new XRay_Model();
+                    XRayModel Model = new XRayModel();
                     if (Model.OpenFile(files[i]))
                     {
                         if (Batch.ProcessReplace(Model, Chunk, ReplacerTextBox.Text, NewTextBox.Text, ReplaceSubstrings.Checked, ref LinesCount))

@@ -5,13 +5,9 @@ using Aspose.ThreeD;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Forms;
 using Aspose.ThreeD.Shading;
-using System.Drawing;
-using System.Runtime.InteropServices.ComTypes;
 
 namespace OgfTool
 {
@@ -141,32 +137,32 @@ namespace OgfTool
         MT4_SKELETON_RIGID = 10,   // CKinematics
         MT4_TREE_PM = 11,  // FTreeVisual_PM
 
-        MT4_OMF = 64, // fake model type to distinguish .omf
+        MT4_OMF = 64, // fake model Type to distinguish .omf
     };
 
     public class SSkelVert
     {
-        public float[] uv;
-        public float[] offs;
-        public float[] norm;
-        public float[] tang;
-        public float[] binorm;
+        public float[] Uv { get; set; }
+        public float[] Offs { get; set; }
+        public float[] norm { get; set; }
+        public float[] tang { get; set; }
+        public float[] binorm { get; set; }
 
-        public uint[] bones_id;
-        public float[] bones_infl;
+        public uint[] bones_id { get; set; }
+        public float[] bones_infl { get; set; }
 
-        public float[] local_offset;
-        public float[] local_rotation;
-        public float[] local_offset2;
-        public float[] local_rotation2;
+        public float[] local_offset { get; set; }
+        public float[] local_rotation { get; set; }
+        public float[] local_offset2 { get; set; }
+        public float[] local_rotation2 { get; set; }
 
-        public float[] center;
-        public bool rotation_local;
+        public float[] center { get; set; }
+        public bool rotation_local { get; set; }
 
         public SSkelVert()
         {
-            uv = new float[2] { 0.0f, 0.0f };
-            offs = new float[3] { 0.0f, 0.0f, 0.0f };
+            Uv = new float[2] { 0.0f, 0.0f };
+            Offs = new float[3] { 0.0f, 0.0f, 0.0f };
             norm = new float[3] { 0.0f, 0.0f, 0.0f };
             tang = new float[3] { 0.0f, 0.0f, 0.0f };
             binorm = new float[3] { 0.0f, 0.0f, 0.0f };
@@ -182,7 +178,7 @@ namespace OgfTool
 
         public float[] Offset()
         {
-            float[] offset = FVec.Add(offs, local_offset);
+            float[] offset = FVec.Add(Offs, local_offset);
             offset = FVec.Add(offset, local_offset2);
             offset = FVec.RotateXYZ(offset, local_rotation2);
             return FVec.RotateXYZ(offset, local_rotation, rotation_local ? center : new float[3]);
@@ -190,7 +186,7 @@ namespace OgfTool
 
         public float[] Offset2()
         {
-            float[] offset = FVec.Add(offs, local_offset);
+            float[] offset = FVec.Add(Offs, local_offset);
             offset = FVec.RotateXYZ(offset, local_rotation2);
             return FVec.RotateXYZ(offset, local_rotation, rotation_local ? center : new float[3]);
         }
@@ -213,26 +209,29 @@ namespace OgfTool
             return FVec.RotateXYZ(vec, local_rotation);
         }
 
-        public static void GenerateNormals(ref List<SSkelVert> Vertices, List<SSkelFace> Faces, bool generate_normal = true)
+        public static void GenerateNormals(List<SSkelVert> Vertices, List<SSkelFace> Faces, bool generate_normal = true)
         {
-            for (int i = 0; i < Vertices.Count; i++)
+            foreach (var vertex in Vertices)
             {
                 if (generate_normal)
-                    Vertices[i].norm = new float[3] { 0.0f, 0.0f, 0.0f };
-                Vertices[i].tang = new float[3] { 0.0f, 0.0f, 0.0f };
-                Vertices[i].binorm = new float[3] { 0.0f, 0.0f, 0.0f };
+                {
+                    vertex.norm = new float[3] { 0.0f, 0.0f, 0.0f };
+                }
+
+                vertex.tang = new float[3] { 0.0f, 0.0f, 0.0f };
+                vertex.binorm = new float[3] { 0.0f, 0.0f, 0.0f };
             }
 
-            for (int i = 0; i < Faces.Count; i++)
+            foreach (var face in Faces)
             {
-                int ia = Faces[i].v[0];
-                int ib = Faces[i].v[1];
-                int ic = Faces[i].v[2];
+                int ia = face.Vertex[0];
+                int ib = face.Vertex[1];
+                int ic = face.Vertex[2];
 
-                float[] dv1 = FVec.Sub(Vertices[ia].offs, Vertices[ib].offs);
-                float[] dv2 = FVec.Sub(Vertices[ic].offs, Vertices[ib].offs);
-                float[] duv1 = FVec2.Sub(Vertices[ia].uv, Vertices[ib].uv);
-                float[] duv2 = FVec2.Sub(Vertices[ic].uv, Vertices[ib].uv);
+                float[] dv1 = FVec.Sub(Vertices[ia].Offs, Vertices[ib].Offs);
+                float[] dv2 = FVec.Sub(Vertices[ic].Offs, Vertices[ib].Offs);
+                float[] duv1 = FVec2.Sub(Vertices[ia].Uv, Vertices[ib].Uv);
+                float[] duv2 = FVec2.Sub(Vertices[ic].Uv, Vertices[ib].Uv);
 
                 float r = 1.0f / (duv1[0] * duv2[1] - duv1[1] * duv2[0]);
                 float[] tangent = FVec.Mul(FVec.Sub(FVec.Mul(dv1, duv2[1]), FVec.Mul(dv2, duv1[1])), r);
@@ -255,49 +254,49 @@ namespace OgfTool
                 Vertices[ic].binorm = FVec.Add(Vertices[ic].binorm, binormal);
             }
 
-            for (int i = 0; i < Vertices.Count; i++)
+            foreach (var vertex in Vertices)
             {
                 if (generate_normal)
                 {
-                    Vertices[i].norm = FVec.Normalize(Vertices[i].norm);
-                    Vertices[i].norm = FVec.Mul(Vertices[i].norm, -1.0f);
+                    vertex.norm = FVec.Normalize(vertex.norm);
+                    vertex.norm = FVec.Mul(vertex.norm, -1.0f);
                 }
-                Vertices[i].tang = FVec.Normalize(Vertices[i].tang);
-                Vertices[i].binorm = FVec.Normalize(Vertices[i].binorm);
+                vertex.tang = FVec.Normalize(vertex.tang);
+                vertex.binorm = FVec.Normalize(vertex.binorm);
 
-                if (FVec.IsNan(Vertices[i].tang))
-                    Vertices[i].tang = new float[3] { 0.0f, 0.0f, 0.0f };
+                if (FVec.IsNan(vertex.tang))
+                    vertex.tang = new float[3] { 0.0f, 0.0f, 0.0f };
 
-                if (FVec.IsNan(Vertices[i].binorm))
-                    Vertices[i].binorm = new float[3] { 0.0f, 0.0f, 0.0f };
+                if (FVec.IsNan(vertex.binorm))
+                    vertex.binorm = new float[3] { 0.0f, 0.0f, 0.0f };
             }
         }
     };
 
     public class SSkelFace
     {
-        public int[] v;
+        public int[] Vertex { get; private set; }
         public SSkelFace()
         {
-            v = new int[3] { 0, 0, 0 };
+            Vertex = new int[3] { 0, 0, 0 };
         }
     };
 
     public class VIPM_SWR
     {
-        public uint offset;
-        public ushort num_tris;
-        public ushort num_verts;
+        public uint Offset { get; set; }
+        public ushort NumTris { get; set; }
+        public ushort NumVerts { get; set; }
 
         public VIPM_SWR()
         {
-            offset = 0;
-            num_tris = 0;
-            num_verts = 0;
+            Offset = 0;
+            NumTris = 0;
+            NumVerts = 0;
         }
     };
 
-    public class XRay_Model
+    public class XRayModel
     {
         public enum ModelFormat
         {
@@ -335,78 +334,78 @@ namespace OgfTool
         delegate void WriteSceneMesh(List<SSkelVert> Verts, List<SSkelFace> Faces, string texture, bool allow_texture);
         delegate void AddChild();
 
-        public int Format;
-        public uint BrokenType;
-        public bool IsCopModel;
+        private int format;
+        public uint BrokenType { get; set; }
+        public bool IsCopModel { get; set; }
 
-        public OGF_Header Header;
-        public Description description;
-        public List<OGF_Child> childs;
-        public BoneData bonedata;
-        public IK_Data ikdata;
-        public UserData userdata;
-        public Lod lod;
-        public MotionRefs motion_refs;
-        public OMF motions;
+        public OgfHeader Header { get; set; }
+        public Description Description { get; set; }
+        public List<OgfChild> Childs { get; set; }
+        public BoneData BoneData { get; set; }
+        public IKData IkData { get; set; }
+        public UserData UserData { get; set; }
+        public Lod Lod { get; set; }
+        public MotionRefs MotionRefs { get; set; }
+        public OMF Motions { get; set; }
 
-        public uint chunk_size;
-        public long pos;
+        public uint ChunkSize { get; set; }
+        public long Pos { get; private set; }
 
-        public float[] local_offset;
-        public float[] local_rotation;
+        public float[] LocalOffset { get; set; }
+        public float[] LocalRotation { get; set; }
 
-        public byte[] source_data;
-        public bool Opened;
-        public string FileName;
+        public byte[] SourceData { get; set; }
+        public bool Opened { get; set; }
+        public string FileName { get; set; }
 
-        public XRay_Model()
+        public XRayModel()
         {
             Invalidate();
             Opened = false;
         }
 
-        public void Copy(XRay_Model model)
+        public void Copy(XRayModel model)
         {
-            pos = model.pos;
-            chunk_size = model.chunk_size;
+            Pos = model.Pos;
+            ChunkSize = model.ChunkSize;
             BrokenType = model.BrokenType;
-            motions = model.motions;
-            description = model.description;
-            childs = model.childs;
-            bonedata = model.bonedata;
-            ikdata = model.ikdata;
-            userdata = model.userdata;
-            lod = model.lod;
-            motion_refs = model.motion_refs;
+            Motions = model.Motions;
+            Description = model.Description;
+            Childs = model.Childs;
+            BoneData = model.BoneData;
+            IkData = model.IkData;
+            UserData = model.UserData;
+            Lod = model.Lod;
+            MotionRefs = model.MotionRefs;
             IsCopModel = model.IsCopModel;
             Header = model.Header;
-            source_data = model.source_data;
+            SourceData = model.SourceData;
 
-            local_offset = model.local_offset;
-            local_rotation = model.local_rotation;
-            Format = model.Format;
+            LocalOffset = model.LocalOffset;
+            LocalRotation = model.LocalRotation;
+            format = model.format;
         }
 
         public void Invalidate()
         {
-            pos = 0;
-            chunk_size = 0;
+            Pos = 0;
+            ChunkSize = 0;
             BrokenType = 0;
-            motions = new OMF();
-            description = null;
-            childs = new List<OGF_Child>();
-            bonedata = null;
-            ikdata = null;
-            userdata = null;
-            lod = null;
-            motion_refs = null;
+            Motions = new OMF();
+            Description = null;
+            Childs = new List<OgfChild>();
+            BoneData = null;
+            IkData = null;
+            UserData = null;
+            Lod = null;
+            MotionRefs = null;
             IsCopModel = false;
-            Header = new OGF_Header();
-            source_data = null;
+            Header = new OgfHeader();
+            SourceData = null;
 
-            local_offset = new float[3];
-            local_rotation = new float[3];
-            Format = (int)ModelFormat.eUnknown;
+            LocalOffset = new float[3];
+            LocalRotation = new float[3];
+            format = (int)ModelFormat.eUnknown;
         }
 
         public void Destroy()
@@ -415,7 +414,7 @@ namespace OgfTool
 
         public bool IsProgressive()
         {
-            foreach (var child in childs)
+            foreach (var child in Childs)
             {
                 if (child.Header != null && child.Header.IsProgressive())
                     return true;
@@ -425,57 +424,55 @@ namespace OgfTool
 
         public void RemoveProgressive(float lod)
         {
-            for (int idx = 0; idx < childs.Count; idx++)
+            for (int idx = 0; idx < Childs.Count; idx++)
             {
                 if (Header.IsSkeleton())
-                    childs[idx].Header.GeomdefST();
+                    Childs[idx].Header.GeomdefST();
                 else
-                    childs[idx].Header.Normal();
-                childs[idx].Faces = childs[idx].Faces_SWI(lod);
-                childs[idx].SWI.Clear();
+                    Childs[idx].Header.Normal();
+                Childs[idx].Faces = Childs[idx].Faces_SWI(lod);
+                Childs[idx].SWI.Clear();
             }
         }
 
         public void CalcBonesTransform()
         {
-            if (bonedata != null && ikdata != null)
+            if (BoneData == null || IkData == null)
             {
-                string child_list;
-                BoneRenderTransform[] transforms = BoneRenderTransform.Setup(this, out child_list);
+                return;
+            }
 
-                CalcBones(ref transforms, transforms.Length, child_list);
+            BoneRenderTransform[] transforms = BoneRenderTransform.Setup(this, out string child_list);
+            CalcBones(ref transforms, transforms.Length, child_list);
 
-                for (int i = 0; i < bonedata.bones.Count; i++)
-                {
-                    ikdata.bones[i].render_transform = transforms[i].OutPos();
-                }
+            for (int i = 0; i < BoneData.Bones.Count; i++)
+            {
+                IkData.Bones[i].RenderTransform = transforms[i].OutPos();
             }
         }
 
         public void FixOldBonesBind()
         {
-            if (bonedata != null && ikdata != null && ikdata.chunk_version == 2)
+            if (BoneData != null && IkData != null && IkData.ChunkVersion == 2)
             {
-                string child_list;
-                byte old_ver = ikdata.chunk_version;
-                ikdata.chunk_version = 0;
-                BoneRenderTransform[] transforms = BoneRenderTransform.Setup(this, out child_list);
-                ikdata.chunk_version = old_ver;
+                byte old_ver = IkData.ChunkVersion;
+                IkData.ChunkVersion = 0;
+                BoneRenderTransform[] transforms = BoneRenderTransform.Setup(this, out string child_list);
+                IkData.ChunkVersion = old_ver;
 
                 FixBonesBind(ref transforms, transforms.Length, child_list);
 
-                for (int i = 0; i < bonedata.bones.Count; i++)
+                for (int i = 0; i < BoneData.Bones.Count; i++)
                 {
-                    ikdata.bones[i].fixed_position = transforms[i].OutPos();
-                    ikdata.bones[i].fixed_rotation = transforms[i].OutRot();
+                    IkData.Bones[i].FixedPosition = transforms[i].OutPos();
+                    IkData.Bones[i].FixedRotation = transforms[i].OutRot();
                 }
             }
         }
 
         public float[] FixOldVertexOffset(SSkelVert vert)
         {
-            string child_list;
-            BoneRenderTransform[] transforms = BoneRenderTransform.Setup(this, out child_list);
+            BoneRenderTransform[] transforms = BoneRenderTransform.Setup(this, out string child_list);
             FixVertexOffset(ref transforms, transforms.Length, child_list, (int)vert.bones_id[0], vert.Offset()[0], vert.Offset()[1], vert.Offset()[2]);
 
             return new float[3] { transforms[0].OutPosX, transforms[0].OutPosY, transforms[0].OutPosZ };
@@ -483,7 +480,7 @@ namespace OgfTool
 
         public bool Is(ModelFormat fmt)
         {
-            return BitMask.IsSet(Format, (int)fmt);
+            return BitMask.IsSet(format, (int)fmt);
         }
 
         public bool OpenFile(string filename, bool silent = false)
@@ -500,243 +497,241 @@ namespace OgfTool
 
         private bool LoadOGF(string filename, bool silent = false)
         {
-            var xr_loader = new XRayLoader();
-            XRay_Model model = new XRay_Model();
-
-            model.source_data = File.ReadAllBytes(filename);
-
-            using (var r = new BinaryReader(new MemoryStream(model.source_data)))
+            using (var xr_loader = new XRayLoader())
             {
-                xr_loader.SetStream(r.BaseStream);
-
-                if (!xr_loader.find_chunk((int)OGF.OGF_HEADER, false, true))
+                XRayModel model = new XRayModel
                 {
-                    if (!silent)
-                        MessageBox.Show("Unsupported OGF format! Can't find header chunk!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return false;
-                }
-                else
+                    SourceData = File.ReadAllBytes(filename)
+                };
+
+                using (var r = new BinaryReader(new MemoryStream(model.SourceData)))
                 {
-                    model.Header.Load(xr_loader);
-
-                    if (model.Header.format_version < 3)
-                    {
-                        if (!silent)
-                            MessageBox.Show($"Unsupported OGF version: {model.Header.format_version}!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return false;
-                    }
-                }
-
-                int DescChunk = (model.Header.format_version == 4 ? (int)OGF.OGF4_S_DESC : (int)OGF.OGF3_S_DESC);
-                uint DescriptionSize = xr_loader.find_chunkSize(DescChunk, false, true);
-                if (DescriptionSize > 0)
-                {
-                    model.description = new Description();
-                    model.BrokenType = model.description.Load(xr_loader, DescriptionSize);
-                }
-
-                int ChildChunk = (model.Header.format_version == 4 ? (int)OGF.OGF4_CHILDREN : (int)OGF.OGF3_CHILDREN);
-                bool bFindChunk = xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk(ChildChunk, false, true));
-
-                model.pos = xr_loader.chunk_pos;
-
-                int id = 0;
-
-                // Childs
-                if (bFindChunk)
-                {
-                    while (true)
-                    {
-                        if (!xr_loader.find_chunk(id)) break;
-
-                        Stream temp = xr_loader.reader.BaseStream;
-
-                        if (!xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk(id, false, true))) break;
-
-                        OGF_Child Child = new OGF_Child();
-                        if (!Child.Load(xr_loader))
-                            break;
-
-                        model.childs.Add(Child);
-
-                        id++;
-                        xr_loader.SetStream(temp);
-                    }
-
                     xr_loader.SetStream(r.BaseStream);
-                }
-                else
-                {
-                    OGF_Child Child = new OGF_Child();
-                    if (Child.Load(xr_loader))
-                        model.childs.Add(Child);
-                }
 
-                if (model.childs.Count == 0)
-                {
-                    if (!silent)
-                        MessageBox.Show("Unsupported OGF format! Can't find children chunk!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return false;
-                }
-
-                if (model.Header.IsSkeleton())
-                {
-                    // Bones
-                    if (!xr_loader.find_chunk((int)OGF.OGF_S_BONE_NAMES, false, true))
+                    if (!xr_loader.find_chunk((int)OGF.OGF_HEADER, false, true))
                     {
                         if (!silent)
-                            MessageBox.Show("Unsupported OGF format! Can't find bones chunk!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Unsupported OGF format! Can't find header chunk!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return false;
                     }
                     else
                     {
-                        if (xr_loader.chunk_pos < model.pos)
-                            model.BrokenType = 2;
+                        model.Header.Load(xr_loader);
 
-                        model.bonedata = new BoneData();
-                        model.bonedata.Load(xr_loader);
-                    }
-
-                    // Ik Data
-                    byte IKDataVers = 0;
-
-                    int IKDataChunkRelease = (model.Header.format_version == 4 ? (int)OGF.OGF4_S_IKDATA : (int)OGF.OGF3_S_IKDATA_2);
-                    bool IKDataChunkFind = xr_loader.find_chunk(IKDataChunkRelease, false, true);
-
-                    if (IKDataChunkFind) // Load Release chunk
-                        IKDataVers = 4;
-                    else
-                    {
-                        IKDataChunkFind = model.Header.format_version == 3 && xr_loader.find_chunk((int)OGF.OGF3_S_IKDATA, false, true);
-
-                        if (IKDataChunkFind) // Load Pre Release chunk
-                            IKDataVers = 3;
-                        else
+                        if (model.Header.FormatVersion < 3)
                         {
-                            IKDataChunkFind = model.Header.format_version == 3 && xr_loader.find_chunk((int)OGF.OGF3_S_IKDATA_0, false, true);
-
-                            if (IKDataChunkFind) // Load Builds chunk
-                                IKDataVers = 2;
+                            if (!silent)
+                                MessageBox.Show($"Unsupported OGF version: {model.Header.FormatVersion}!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return false;
                         }
                     }
 
-                    if (IKDataVers != 0)
+                    int DescChunk = (model.Header.FormatVersion == 4 ? (int)OGF.OGF4_S_DESC : (int)OGF.OGF3_S_DESC);
+                    uint DescriptionSize = xr_loader.find_chunkSize(DescChunk, false, true);
+                    if (DescriptionSize > 0)
                     {
-                        model.ikdata = new IK_Data();
-                        model.ikdata.Load(xr_loader, model.bonedata.bones.Count, IKDataVers);
-
-                        model.FixOldBonesBind();
-                        model.CalcBonesTransform();
+                        model.Description = new Description();
+                        model.BrokenType = model.Description.Load(xr_loader, DescriptionSize);
                     }
-                    else if (model.Header.format_version == 4) // Chunk not find, exit if Release OGF
+
+                    int ChildChunk = (model.Header.FormatVersion == 4 ? (int)OGF.OGF4_CHILDREN : (int)OGF.OGF3_CHILDREN);
+                    bool bFindChunk = xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk(ChildChunk, false, true));
+
+                    model.Pos = xr_loader.ChunkPos;
+
+                    int id = 0;
+
+                    // Childs
+                    if (bFindChunk)
+                    {
+                        while (true)
+                        {
+                            if (!xr_loader.find_chunk(id)) break;
+
+                            Stream temp = xr_loader.Reader.BaseStream;
+
+                            if (!xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk(id, false, true))) break;
+
+                            OgfChild Child = new OgfChild();
+                            if (!Child.Load(xr_loader))
+                                break;
+
+                            model.Childs.Add(Child);
+
+                            id++;
+                            xr_loader.SetStream(temp);
+                        }
+
+                        xr_loader.SetStream(r.BaseStream);
+                    }
+                    else
+                    {
+                        OgfChild Child = new OgfChild();
+                        if (Child.Load(xr_loader))
+                            model.Childs.Add(Child);
+                    }
+
+                    if (model.Childs.Count == 0)
                     {
                         if (!silent)
-                            MessageBox.Show("Unsupported OGF format! Can't find ik data chunk!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Unsupported OGF format! Can't find children chunk!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return false;
                     }
 
-                    // Userdata
-                    int UserDataChunk = (model.Header.format_version == 4 ? (int)OGF.OGF4_S_USERDATA : (int)OGF.OGF3_S_USERDATA);
-                    uint UserDataSize = xr_loader.find_chunkSize(UserDataChunk, false, true);
-                    if (UserDataSize > 0)
+                    if (model.Header.IsSkeleton())
                     {
-                        model.userdata = new UserData();
-                        model.userdata.Load(xr_loader, UserDataSize);
-                    }
+                        // Bones
+                        if (!xr_loader.find_chunk((int)OGF.OGF_S_BONE_NAMES, false, true))
+                        {
+                            if (!silent)
+                                MessageBox.Show("Unsupported OGF format! Can't find bones chunk!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return false;
+                        }
+                        else
+                        {
+                            if (xr_loader.ChunkPos < model.Pos)
+                                model.BrokenType = 2;
 
-                    // Lod ref
-                    if (model.Header.format_version == 4 && xr_loader.find_chunk((int)OGF.OGF4_S_LODS, false, true))
-                    {
-                        model.lod = new Lod();
-                        model.lod.Load(xr_loader);
-                    }
+                            model.BoneData = new BoneData();
+                            model.BoneData.Load(xr_loader);
+                        }
 
-                    // Motion Refs
-                    int RefsChunk = (model.Header.format_version == 4 ? (int)OGF.OGF4_S_MOTION_REFS : (int)OGF.OGF3_S_MOTION_REFS);
-                    bool StringRefs = xr_loader.find_chunk(RefsChunk, false, true);
+                        // Ik Data
+                        byte IKDataVers = 0;
 
-                    if (StringRefs || model.Header.format_version == 4 && xr_loader.find_chunk((int)OGF.OGF4_S_MOTION_REFS2, false, true))
-                    {
-                        model.motion_refs = new MotionRefs();
-                        model.motion_refs.Load(xr_loader, StringRefs);
-                    }
+                        int IKDataChunkRelease = (model.Header.FormatVersion == 4 ? (int)OGF.OGF4_S_IKDATA : (int)OGF.OGF3_S_IKDATA_2);
+                        bool IKDataChunkFind = xr_loader.find_chunk(IKDataChunkRelease, false, true);
 
-                    //Motions
-                    if (xr_loader.find_chunk((int)OGF.OGF_S_MOTIONS, false, true))
-                    {
-                        xr_loader.reader.BaseStream.Position -= 8;
-                        byte[] OMF = xr_loader.ReadBytes((int)xr_loader.reader.BaseStream.Length - (int)xr_loader.reader.BaseStream.Position);
-                        model.motions.SetData(OMF);
+                        if (IKDataChunkFind) // Load Release chunk
+                            IKDataVers = 4;
+                        else
+                        {
+                            IKDataChunkFind = model.Header.FormatVersion == 3 && xr_loader.find_chunk((int)OGF.OGF3_S_IKDATA, false, true);
+
+                            if (IKDataChunkFind) // Load Pre Release chunk
+                                IKDataVers = 3;
+                            else
+                            {
+                                IKDataChunkFind = model.Header.FormatVersion == 3 && xr_loader.find_chunk((int)OGF.OGF3_S_IKDATA_0, false, true);
+
+                                if (IKDataChunkFind) // Load Builds chunk
+                                    IKDataVers = 2;
+                            }
+                        }
+
+                        if (IKDataVers != 0)
+                        {
+                            model.IkData = new IKData();
+                            model.IkData.Load(xr_loader, model.BoneData.Bones.Count, IKDataVers);
+
+                            model.FixOldBonesBind();
+                            model.CalcBonesTransform();
+                        }
+                        else if (model.Header.FormatVersion == 4) // Chunk not find, exit if Release OGF
+                        {
+                            if (!silent)
+                                MessageBox.Show("Unsupported OGF format! Can't find ik data chunk!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return false;
+                        }
+
+                        // Userdata
+                        int UserDataChunk = (model.Header.FormatVersion == 4 ? (int)OGF.OGF4_S_USERDATA : (int)OGF.OGF3_S_USERDATA);
+                        uint UserDataSize = xr_loader.find_chunkSize(UserDataChunk, false, true);
+                        if (UserDataSize > 0)
+                        {
+                            model.UserData = new UserData();
+                            model.UserData.Load(xr_loader, UserDataSize);
+                        }
+
+                        // Lod ref
+                        if (model.Header.FormatVersion == 4 && xr_loader.find_chunk((int)OGF.OGF4_S_LODS, false, true))
+                        {
+                            model.Lod = new Lod();
+                            model.Lod.Load(xr_loader);
+                        }
+
+                        // Motion Refs
+                        int RefsChunk = (model.Header.FormatVersion == 4 ? (int)OGF.OGF4_S_MOTION_REFS : (int)OGF.OGF3_S_MOTION_REFS);
+                        bool StringRefs = xr_loader.find_chunk(RefsChunk, false, true);
+
+                        if (StringRefs || model.Header.FormatVersion == 4 && xr_loader.find_chunk((int)OGF.OGF4_S_MOTION_REFS2, false, true))
+                        {
+                            model.MotionRefs = new MotionRefs();
+                            model.MotionRefs.Load(xr_loader, StringRefs);
+                        }
+
+                        //Motions
+                        if (xr_loader.find_chunk((int)OGF.OGF_S_MOTIONS, false, true))
+                        {
+                            xr_loader.Reader.BaseStream.Position -= 8;
+                            byte[] OMF = xr_loader.ReadBytes((int)xr_loader.Reader.BaseStream.Length - (int)xr_loader.Reader.BaseStream.Position);
+                            model.Motions.SetData(OMF);
+                        }
                     }
                 }
+
+                BitMask.Null(ref model.format);
+                BitMask.Set(ref model.format, (int)ModelFormat.eOGF);
+
+                Copy(model);
             }
 
-            BitMask.Null(ref model.Format);
-            BitMask.Set(ref model.Format, (int)ModelFormat.eOGF);
-
-            Copy(model);
             return true;
         }
 
         private bool LoadFromScene(string filename, LoadOptions options)
         {
             Invalidate();
-            source_data = File.ReadAllBytes(filename);
-            description = new Description();
+            SourceData = File.ReadAllBytes(filename);
+            Description = new Description();
 
             Scene scene = new Scene();
             scene.Open(filename, options);
 
-            for (int i = 0; i < scene.RootNode.ChildNodes.Count; i++)
+            foreach (Node meshNode in scene.RootNode.ChildNodes)
             {
-                Node meshNode = scene.RootNode.ChildNodes[i];
-
-                OGF_Child child = new OGF_Child();
-                child.Header = new OGF_Header();
+                OgfChild child = new OgfChild();
+                child.Header = new OgfHeader();
 
                 if (meshNode.Material != null)
-                    child.m_texture = meshNode.Material.Name;
+                    child.Texture = meshNode.Material.Name;
                 else
-                    child.m_texture = "default";
-                child.m_shader = "default";
+                    child.Texture = "default";
+                child.Shader = "default";
 
                 Mesh mesh = meshNode.Entity as Mesh;
                 mesh = PolygonModifier.Triangulate(mesh);
-                VertexElementNormal Normals = mesh.GetElement(VertexElementType.Normal) as VertexElementNormal;
-                VertexElementTangent Tangents = mesh.GetElement(VertexElementType.Tangent) as VertexElementTangent;
-                VertexElementBinormal Binormals = mesh.GetElement(VertexElementType.Binormal) as VertexElementBinormal;
-                VertexElementUV UVs = mesh.GetElement(VertexElementType.UV) as VertexElementUV;
                 for (int v = 0; v < mesh.ControlPoints.Count; v++)
                 {
                     SSkelVert vert = new SSkelVert();
-                    vert.offs = new float[3] { (float)mesh.ControlPoints[v].x, (float)mesh.ControlPoints[v].y, (float)mesh.ControlPoints[v].z };
-                    if (Normals != null)
+                    vert.Offs = new float[3] { (float)mesh.ControlPoints[v].x, (float)mesh.ControlPoints[v].y, (float)mesh.ControlPoints[v].z };
+                    if (mesh.GetElement(VertexElementType.Normal) is VertexElementNormal Normals)
                         vert.norm = new float[3] { (float)Normals.Data[v].x, (float)Normals.Data[v].y, (float)Normals.Data[v].z };
-                    if (Tangents != null)
+                    if (mesh.GetElement(VertexElementType.Tangent) is VertexElementTangent Tangents)
                         vert.tang = new float[3] { (float)Tangents.Data[v].x, (float)Tangents.Data[v].y, (float)Tangents.Data[v].z };
-                    if (Binormals != null)
+                    if (mesh.GetElement(VertexElementType.Binormal) is VertexElementBinormal Binormals)
                         vert.binorm = new float[3] { (float)Binormals.Data[v].x, (float)Binormals.Data[v].y, (float)Binormals.Data[v].z };
-                    if (UVs != null)
-                        vert.uv = new float[2] { (float)UVs.Data[v].x, Math.Abs(1.0f - (float)UVs.Data[v].y) };
+                    if (mesh.GetElement(VertexElementType.UV) is VertexElementUV UVs)
+                        vert.Uv = new float[2] { (float)UVs.Data[v].x, Math.Abs(1.0f - (float)UVs.Data[v].y) };
 
                     child.Vertices.Add(vert);
-                }    
+                }
 
                 for (int f = 0; f < mesh.PolygonCount; f++)
                 {
                     SSkelFace face = new SSkelFace();
-                    face.v[0] = mesh.Polygons[f][0];
-                    face.v[1] = mesh.Polygons[f][1];
-                    face.v[2] = mesh.Polygons[f][2];
+                    face.Vertex[0] = mesh.Polygons[f][0];
+                    face.Vertex[1] = mesh.Polygons[f][1];
+                    face.Vertex[2] = mesh.Polygons[f][2];
                     child.Faces.Add(face);
                 }
 
-                childs.Add(child);
+                Childs.Add(child);
             }
 
             RecalcBBox(true);
-            BitMask.Null(ref Format);
-            BitMask.Set(ref Format, (int)ModelFormat.eObj);
+            BitMask.Null(ref format);
+            BitMask.Set(ref format, (int)ModelFormat.eObj);
             return true;
         }
 
@@ -753,76 +748,78 @@ namespace OgfTool
         private bool LoadDM(string filename)
         {
             Invalidate();
-            source_data = File.ReadAllBytes(filename);
+            SourceData = File.ReadAllBytes(filename);
 
-            var xr_loader = new XRayLoader();
-
-            using (var r = new BinaryReader(new MemoryStream(source_data)))
+            using (var xr_loader = new XRayLoader())
             {
-                xr_loader.SetStream(r.BaseStream);
+                using (var r = new BinaryReader(new MemoryStream(SourceData)))
+                {
+                    xr_loader.SetStream(r.BaseStream);
 
-                OGF_Child chld = new OGF_Child();
-                chld.LoadDM(xr_loader);
-                childs.Add(chld);
+                    OgfChild chld = new OgfChild();
+                    chld.LoadDM(xr_loader);
+                    Childs.Add(chld);
+                }
             }
 
-            BitMask.Null(ref Format);
-            BitMask.Set(ref Format, (int)ModelFormat.eDM);
+            BitMask.Null(ref format);
+            BitMask.Set(ref format, (int)ModelFormat.eDM);
             return true;
         }
 
         private bool LoadDetail(string filename)
         {
             Invalidate();
-            source_data = File.ReadAllBytes(filename);
+            SourceData = File.ReadAllBytes(filename);
 
-            var xr_loader = new XRayLoader();
-
-            using (var r = new BinaryReader(new MemoryStream(source_data)))
+            using (var xr_loader = new XRayLoader())
             {
-                xr_loader.SetStream(r.BaseStream);
-                xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk(1, false, true));
-
-                int det_id = 0;
-
-                while (true)
+                using (var r = new BinaryReader(new MemoryStream(SourceData)))
                 {
-                    if (!xr_loader.find_chunk(det_id)) break;
+                    xr_loader.SetStream(r.BaseStream);
+                    xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk(1, false, true));
 
-                    Stream temp = xr_loader.reader.BaseStream;
+                    int det_id = 0;
 
-                    if (!xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk(det_id, false, true))) break;
-
-                    OGF_Child chld = new OGF_Child();
-                    chld.LoadDM(xr_loader);
-                    childs.Add(chld);
-
-                    det_id++;
-                    xr_loader.SetStream(temp);
-                }
-
-                float step_radius = 1.2f;
-                float view_offsX = 0.0f;
-                float view_offsZ = 0.0f;
-                int size = (int)Math.Round(Math.Sqrt(childs.Count), 0);
-
-                for (int i = 0; i < childs.Count; i++)
-                {
-                    if (i % size == 0)
+                    while (true)
                     {
-                        view_offsX = 0.0f;
-                        view_offsZ += step_radius;
+                        if (!xr_loader.find_chunk(det_id)) break;
+
+                        Stream temp = xr_loader.Reader.BaseStream;
+
+                        if (!xr_loader.SetData(xr_loader.find_and_return_chunk_in_chunk(det_id, false, true))) break;
+
+                        OgfChild chld = new OgfChild();
+                        chld.LoadDM(xr_loader);
+                        Childs.Add(chld);
+
+                        det_id++;
+                        xr_loader.SetStream(temp);
                     }
 
-                    childs[i].SetLocalOffsetMain(new float[3] { view_offsX, 0.0f, view_offsZ });
+                    float step_radius = 1.2f;
+                    float view_offsX = 0.0f;
+                    float view_offsZ = 0.0f;
+                    int size = (int)Math.Round(Math.Sqrt(Childs.Count), 0);
 
-                    view_offsX += step_radius;
+                    for (int i = 0; i < Childs.Count; i++)
+                    {
+                        if (i % size == 0)
+                        {
+                            view_offsX = 0.0f;
+                            view_offsZ += step_radius;
+                        }
+
+                        Childs[i].SetLocalOffsetMain(new float[3] { view_offsX, 0.0f, view_offsZ });
+
+                        view_offsX += step_radius;
+                    }
                 }
             }
 
-            BitMask.Null(ref Format);
-            BitMask.Set(ref Format, (int)ModelFormat.eDM);
-            BitMask.Set(ref Format, (int)ModelFormat.eDetail);
+            BitMask.Null(ref format);
+            BitMask.Set(ref format, (int)ModelFormat.eDM);
+            BitMask.Set(ref format, (int)ModelFormat.eDetail);
             return true;
         }
 
@@ -846,17 +843,17 @@ namespace OgfTool
 
         public void SaveFile(string filename, bool backup = false, ModelFormat override_fmt = ModelFormat.eUnknown)
         {
-            if (source_data == null) return;
+            if (SourceData == null) return;
 
             if (override_fmt != ModelFormat.eUnknown)
                 SaveFileAsFmt(filename, backup, override_fmt);
-            else if (BitMask.IsSet(Format, (int)ModelFormat.eDetail))
+            else if (BitMask.IsSet(format, (int)ModelFormat.eDetail))
                 SaveDetail(filename, backup);
-            else if (BitMask.IsSet(Format, (int)ModelFormat.eDM))
+            else if (BitMask.IsSet(format, (int)ModelFormat.eDM))
                 SaveDM(filename, backup);
-            else if (BitMask.IsSet(Format, (int)ModelFormat.eOGF))
+            else if (BitMask.IsSet(format, (int)ModelFormat.eOGF))
                 SaveOGF(filename, backup);
-            else if (BitMask.IsSet(Format, (int)ModelFormat.eObj))
+            else if (BitMask.IsSet(format, (int)ModelFormat.eObj))
             {
                 SaveObj saveObj = new SaveObj();
                 saveObj.ShowDialog();
@@ -922,7 +919,7 @@ namespace OgfTool
         {
             using (var fileStream = new FileStream(filename, FileMode.OpenOrCreate))
             {
-                fileStream.Write(motions.data(), 0, motions.data().Length);
+                fileStream.Write(Motions.Data(), 0, Motions.Data().Length);
                 fileStream.Close();
             }
 
@@ -933,16 +930,16 @@ namespace OgfTool
         {
             List<byte> file_bytes = new List<byte>();
 
-            TryRepairUserdata(userdata);
-            using (var fileStream = new BinaryReader(new MemoryStream(source_data)))
+            TryRepairUserdata(UserData);
+            using (var fileStream = new BinaryReader(new MemoryStream(SourceData)))
             {
                 byte[] temp;
                 if (!Header.IsStaticSingle())
-                    file_bytes.AddRange(Header.data());
+                    file_bytes.AddRange(Header.Data());
 
-                if (description != null)
+                if (Description != null)
                 {
-                    byte[] DescriptionData = description.data();
+                    byte[] DescriptionData = Description.Data();
 
                     file_bytes.AddRange(BitConverter.GetBytes((uint)OGF.OGF4_S_DESC));
                     file_bytes.AddRange(BitConverter.GetBytes(DescriptionData.Length));
@@ -951,34 +948,34 @@ namespace OgfTool
 
                 if (Header.IsStaticSingle()) // Single mesh
                 {
-                    file_bytes.AddRange(childs[0].data());
-                    fileStream.BaseStream.Position += childs[0].old_size;
+                    file_bytes.AddRange(Childs[0].Data());
+                    fileStream.BaseStream.Position += Childs[0].OldSize;
                 }
                 else // Hierrarhy mesh
                 {
-                    fileStream.ReadBytes((int)(pos - fileStream.BaseStream.Position));
+                    fileStream.ReadBytes((int)(Pos - fileStream.BaseStream.Position));
 
                     fileStream.ReadBytes(4);
                     uint OldChildrenChunkSize = fileStream.ReadUInt32();
                     fileStream.BaseStream.Position += OldChildrenChunkSize;
 
                     uint ChildrenChunkSize = 0;
-                    foreach (var ch in childs)
+                    foreach (var ch in Childs)
                     {
                         if (!ch.to_delete)
-                            ChildrenChunkSize += (uint)ch.data().Length + 8;
+                            ChildrenChunkSize += (uint)ch.Data().Length + 8;
                     }
 
-                    int ChildrenChunk = (Header.format_version == 4 ? (int)OGF.OGF4_CHILDREN : (int)OGF.OGF3_CHILDREN);
+                    int ChildrenChunk = (Header.FormatVersion == 4 ? (int)OGF.OGF4_CHILDREN : (int)OGF.OGF3_CHILDREN);
                     file_bytes.AddRange(BitConverter.GetBytes(ChildrenChunk));
                     file_bytes.AddRange(BitConverter.GetBytes(ChildrenChunkSize));
 
                     int ChildChunk = 0;
-                    foreach (var ch in childs)
+                    foreach (var ch in Childs)
                     {
                         if (ch.to_delete) continue;
 
-                        byte[] ChildData = ch.data();
+                        byte[] ChildData = ch.Data();
 
                         file_bytes.AddRange(BitConverter.GetBytes(ChildChunk));
                         file_bytes.AddRange(BitConverter.GetBytes(ChildData.Length));
@@ -989,114 +986,114 @@ namespace OgfTool
 
                 if (Header.IsSkeleton())
                 {
-                    if (bonedata != null)
+                    if (BoneData != null)
                     {
-                        if (BrokenType == 0 && bonedata.pos > 0 && (bonedata.pos - fileStream.BaseStream.Position) > 0) // Двигаемся до текущего чанка
+                        if (BrokenType == 0 && BoneData.Pos > 0 && (BoneData.Pos - fileStream.BaseStream.Position) > 0) // Двигаемся до текущего чанка
                         {
-                            temp = fileStream.ReadBytes((int)(bonedata.pos - fileStream.BaseStream.Position));
+                            temp = fileStream.ReadBytes((int)(BoneData.Pos - fileStream.BaseStream.Position));
                             file_bytes.AddRange(temp);
                         }
 
-                        byte[] BonesData = bonedata.data(BrokenType == 2);
+                        byte[] BonesData = BoneData.Data(BrokenType == 2);
 
                         file_bytes.AddRange(BitConverter.GetBytes((uint)OGF.OGF_S_BONE_NAMES));
                         file_bytes.AddRange(BitConverter.GetBytes(BonesData.Length));
                         file_bytes.AddRange(BonesData);
 
-                        fileStream.ReadBytes(bonedata.old_size + 8);
+                        fileStream.ReadBytes(BoneData.OldSize + 8);
                     }
 
-                    if (ikdata != null)
+                    if (IkData != null)
                     {
-                        if (BrokenType == 0 && ikdata.pos > 0 && (ikdata.pos - fileStream.BaseStream.Position) > 0) // Двигаемся до текущего чанка
+                        if (BrokenType == 0 && IkData.Pos > 0 && (IkData.Pos - fileStream.BaseStream.Position) > 0) // Двигаемся до текущего чанка
                         {
-                            temp = fileStream.ReadBytes((int)(ikdata.pos - fileStream.BaseStream.Position));
+                            temp = fileStream.ReadBytes((int)(IkData.Pos - fileStream.BaseStream.Position));
                             file_bytes.AddRange(temp);
                         }
 
-                        byte[] IKDataData = ikdata.data();
+                        byte[] IKDataData = IkData.Data();
 
-                        file_bytes.AddRange(BitConverter.GetBytes(ikdata.ChunkID(Header.format_version)));
+                        file_bytes.AddRange(BitConverter.GetBytes(IkData.ChunkID(Header.FormatVersion)));
                         file_bytes.AddRange(BitConverter.GetBytes(IKDataData.Length));
                         file_bytes.AddRange(IKDataData);
 
-                        fileStream.ReadBytes(ikdata.old_size + 8);
+                        fileStream.ReadBytes(IkData.OldSize + 8);
                     }
 
-                    if (userdata != null)
+                    if (UserData != null)
                     {
-                        if (userdata.pos > 0 && (userdata.pos - fileStream.BaseStream.Position) > 0) // Двигаемся до текущего чанка
+                        if (UserData.Pos > 0 && (UserData.Pos - fileStream.BaseStream.Position) > 0) // Двигаемся до текущего чанка
                         {
-                            temp = fileStream.ReadBytes((int)(userdata.pos - fileStream.BaseStream.Position));
+                            temp = fileStream.ReadBytes((int)(UserData.Pos - fileStream.BaseStream.Position));
                             file_bytes.AddRange(temp);
                         }
 
-                        if (userdata.userdata != "") // Пишем если есть что писать
+                        if (!string.IsNullOrEmpty(UserData.Userdata)) // Пишем если есть что писать
                         {
-                            uint UserDataChunk = (Header.format_version == 4 ? (uint)OGF.OGF4_S_USERDATA : (uint)OGF.OGF3_S_USERDATA);
-                            byte[] UserDataData = userdata.data();
+                            uint UserDataChunk = (Header.FormatVersion == 4 ? (uint)OGF.OGF4_S_USERDATA : (uint)OGF.OGF3_S_USERDATA);
+                            byte[] UserDataData = UserData.Data();
 
                             file_bytes.AddRange(BitConverter.GetBytes(UserDataChunk));
                             file_bytes.AddRange(BitConverter.GetBytes(UserDataData.Length));
                             file_bytes.AddRange(UserDataData);
                         }
 
-                        if (userdata.old_size > 0) // Сдвигаем позицию риадера если в модели был чанк
-                            fileStream.ReadBytes(userdata.old_size + 8);
+                        if (UserData.OldSize > 0) // Сдвигаем позицию риадера если в модели был чанк
+                            fileStream.ReadBytes(UserData.OldSize + 8);
                     }
 
-                    if (lod != null && Header.format_version == 4) // Стринг лод только у релизных OGF
+                    if (Lod != null && Header.FormatVersion == 4) // Стринг лод только у релизных OGF
                     {
-                        if (lod.pos > 0 && (lod.pos - fileStream.BaseStream.Position) > 0) // Двигаемся до текущего чанка
+                        if (Lod.Pos > 0 && (Lod.Pos - fileStream.BaseStream.Position) > 0) // Двигаемся до текущего чанка
                         {
-                            temp = fileStream.ReadBytes((int)(lod.pos - fileStream.BaseStream.Position));
+                            temp = fileStream.ReadBytes((int)(Lod.Pos - fileStream.BaseStream.Position));
                             file_bytes.AddRange(temp);
                         }
 
-                        if (lod.lod_path != "") // Пишем если есть что писать
+                        if (!string.IsNullOrEmpty(Lod.LodPath)) // Пишем если есть что писать
                         {
-                            byte[] LodData = lod.data();
+                            byte[] LodData = Lod.Data();
 
                             file_bytes.AddRange(BitConverter.GetBytes((uint)OGF.OGF4_S_LODS));
                             file_bytes.AddRange(BitConverter.GetBytes(LodData.Length));
                             file_bytes.AddRange(LodData);
                         }
 
-                        if (lod.old_size > 0) // Сдвигаем позицию риадера если в модели был чанк
-                            fileStream.ReadBytes(lod.old_size + 8);
+                        if (Lod.OldSize > 0) // Сдвигаем позицию риадера если в модели был чанк
+                            fileStream.ReadBytes(Lod.OldSize + 8);
                     }
 
                     bool refs_created = false;
-                    if (motion_refs != null)
+                    if (MotionRefs != null)
                     {
-                        if (motion_refs.pos > 0 && (motion_refs.pos - fileStream.BaseStream.Position) > 0) // Двигаемся до текущего чанка
+                        if (MotionRefs.Pos > 0 && (MotionRefs.Pos - fileStream.BaseStream.Position) > 0) // Двигаемся до текущего чанка
                         {
-                            temp = fileStream.ReadBytes((int)(motion_refs.pos - fileStream.BaseStream.Position));
+                            temp = fileStream.ReadBytes((int)(MotionRefs.Pos - fileStream.BaseStream.Position));
                             file_bytes.AddRange(temp);
                         }
 
-                        if (motion_refs.refs.Count > 0) // Пишем если есть что писать
+                        if (MotionRefs.Refs.Count > 0) // Пишем если есть что писать
                         {
                             refs_created = true;
-                            byte[] MotionRefsData = motion_refs.data(motion_refs.soc);
+                            byte[] MotionRefsData = MotionRefs.Data(MotionRefs.Soc);
 
-                            if (!motion_refs.soc)
+                            if (!MotionRefs.Soc)
                                 file_bytes.AddRange(BitConverter.GetBytes((uint)OGF.OGF4_S_MOTION_REFS2));
                             else
                             {
-                                uint RefsChunk = (Header.format_version == 4 ? (uint)OGF.OGF4_S_MOTION_REFS : (uint)OGF.OGF3_S_MOTION_REFS);
+                                uint RefsChunk = (Header.FormatVersion == 4 ? (uint)OGF.OGF4_S_MOTION_REFS : (uint)OGF.OGF3_S_MOTION_REFS);
                                 file_bytes.AddRange(BitConverter.GetBytes(RefsChunk));
                             }
                             file_bytes.AddRange(BitConverter.GetBytes(MotionRefsData.Length));
                             file_bytes.AddRange(MotionRefsData);
                         }
 
-                        if (motion_refs.old_size > 0) // Сдвигаем позицию риадера если в модели был чанк
-                            fileStream.ReadBytes(motion_refs.old_size + 8);
+                        if (MotionRefs.OldSize > 0) // Сдвигаем позицию риадера если в модели был чанк
+                            fileStream.ReadBytes(MotionRefs.OldSize + 8);
                     }
 
-                    if (motions.data() != null && !refs_created)
-                        file_bytes.AddRange(motions.data());
+                    if (Motions.Data() != null && !refs_created)
+                        file_bytes.AddRange(Motions.Data());
                 }
                 else if (!Is(ModelFormat.eObj))
                 {
@@ -1111,28 +1108,28 @@ namespace OgfTool
         public void SaveDetail(string filename, bool backup = false)
         {
             List<byte> file_bytes = new List<byte>();
-            using (var fileStream = new BinaryReader(new MemoryStream(source_data)))
+            using (var fileStream = new BinaryReader(new MemoryStream(SourceData)))
             {
                 fileStream.ReadBytes(4);
                 uint OldDetailsSize = fileStream.ReadUInt32();
                 fileStream.BaseStream.Position += OldDetailsSize;
 
                 uint DetailsChunkSize = 0;
-                foreach (var ch in childs)
+                foreach (var ch in Childs)
                 {
                     if (!ch.to_delete)
-                        DetailsChunkSize += (uint)ch.dm_data().Length + 8;
+                        DetailsChunkSize += (uint)ch.DmData().Length + 8;
                 }
 
                 file_bytes.AddRange(BitConverter.GetBytes(1));
                 file_bytes.AddRange(BitConverter.GetBytes(DetailsChunkSize));
 
                 int DetailID = 0;
-                foreach (var ch in childs)
+                foreach (var ch in Childs)
                 {
                     if (ch.to_delete) continue;
 
-                    byte[] DetailData = ch.dm_data();
+                    byte[] DetailData = ch.DmData();
 
                     file_bytes.AddRange(BitConverter.GetBytes(DetailID));
                     file_bytes.AddRange(BitConverter.GetBytes(DetailData.Length));
@@ -1173,7 +1170,7 @@ namespace OgfTool
         {
             List<byte> file_bytes = new List<byte>();
 
-            byte[] dm_data = childs[child].dm_data();
+            byte[] dm_data = Childs[child].DmData();
             file_bytes.AddRange(dm_data);
             WriteFile(filename, file_bytes.ToArray(), bkp);
         }
@@ -1189,10 +1186,10 @@ namespace OgfTool
                 Node meshNode = new Node(mesh_name);
 
                 Mesh mesh = new Mesh();
-                VertexElementNormal Normals = mesh.CreateElement(VertexElementType.Normal, MappingMode.ControlPoint, ReferenceMode.Direct) as VertexElementNormal;
-                VertexElementTangent Tangents = mesh.CreateElement(VertexElementType.Tangent, MappingMode.ControlPoint, ReferenceMode.Direct) as VertexElementTangent;
-                VertexElementBinormal Binormals = mesh.CreateElement(VertexElementType.Binormal, MappingMode.ControlPoint, ReferenceMode.Direct) as VertexElementBinormal;
-                VertexElementUV UVs = mesh.CreateElement(VertexElementType.UV, MappingMode.ControlPoint, ReferenceMode.Direct) as VertexElementUV;
+                var Normals = mesh.CreateElement(VertexElementType.Normal, MappingMode.ControlPoint, ReferenceMode.Direct) as VertexElementNormal;
+                var Tangents = mesh.CreateElement(VertexElementType.Tangent, MappingMode.ControlPoint, ReferenceMode.Direct) as VertexElementTangent;
+                var Binormals = mesh.CreateElement(VertexElementType.Binormal, MappingMode.ControlPoint, ReferenceMode.Direct) as VertexElementBinormal;
+                var UVs = mesh.CreateElement(VertexElementType.UV, MappingMode.ControlPoint, ReferenceMode.Direct) as VertexElementUV;
 
                 for (int i = 0; i < Vertices.Count; i++)
                 {
@@ -1204,7 +1201,7 @@ namespace OgfTool
                     Tangents.Data.Add(new Vector4(tang[0], tang[1], tang[2], 0.0f));
                     float[] binorm = FVec.MirrorZ(Vertices[i].Binorm());
                     Binormals.Data.Add(new Vector4(binorm[0], binorm[1], binorm[2], 0.0f));
-                    float[] uv = new float[2] { Vertices[i].uv[0], Math.Abs(1.0f - Vertices[i].uv[1]) };
+                    float[] uv = new float[2] { Vertices[i].Uv[0], Math.Abs(1.0f - Vertices[i].Uv[1]) };
                     UVs.Data.Add(new Vector4(uv[0], uv[1], 0.0f, 0.0f));
                 }
 
@@ -1212,9 +1209,9 @@ namespace OgfTool
                 for (int i = 0; i < Faces.Count; i++)
                 {
                     builder.Begin();
-                    builder.AddVertex(Faces[i].v[2]);
-                    builder.AddVertex(Faces[i].v[1]);
-                    builder.AddVertex(Faces[i].v[0]);
+                    builder.AddVertex(Faces[i].Vertex[2]);
+                    builder.AddVertex(Faces[i].Vertex[1]);
+                    builder.AddVertex(Faces[i].Vertex[0]);
                     builder.End();
                 }
 
@@ -1238,7 +1235,7 @@ namespace OgfTool
             List<SSkelVert> sSkelVerts = new List<SSkelVert>();
             List<SSkelFace> sSkelFaces = new List<SSkelFace>();
 
-            foreach (var ch in childs)
+            foreach (var ch in Childs)
             {
                 if (ch.to_delete) continue;
 
@@ -1246,7 +1243,7 @@ namespace OgfTool
                 sSkelFaces.Clear();
                 sSkelVerts.AddRange(ch.Vertices);
                 sSkelFaces.AddRange(ch.Faces_SWI(lod));
-                WriteMesh(sSkelVerts, sSkelFaces, viewport_bones ? "null_texture" : Path.GetFileName(ch.m_texture), viewport_textures);
+                WriteMesh(sSkelVerts, sSkelFaces, viewport_bones ? "null_texture" : Path.GetFileName(ch.Texture), viewport_textures);
             }
 
             if (viewport_bbox)
@@ -1255,40 +1252,40 @@ namespace OgfTool
                 {
                     sSkelVerts.Clear();
                     sSkelFaces.Clear();
-                    sSkelVerts.AddRange(Header.bb.GetVisualVerts());
-                    sSkelFaces.AddRange(Header.bb.GetVisualFaces(sSkelVerts));
+                    sSkelVerts.AddRange(Header.BBox.GetVisualVerts());
+                    sSkelFaces.AddRange(Header.BBox.GetVisualFaces(sSkelVerts));
                     WriteMesh(sSkelVerts, sSkelFaces, "bbox_main_texture", true);
                 }
 
-                foreach (var ch in childs)
+                foreach (var ch in Childs)
                 {
                     if (ch.to_delete) continue;
 
                     sSkelVerts.Clear();
                     sSkelFaces.Clear();
-                    sSkelVerts.AddRange(ch.Header.bb.GetVisualVerts());
-                    sSkelFaces.AddRange(ch.Header.bb.GetVisualFaces(sSkelVerts));
+                    sSkelVerts.AddRange(ch.Header.BBox.GetVisualVerts());
+                    sSkelFaces.AddRange(ch.Header.BBox.GetVisualFaces(sSkelVerts));
                     WriteMesh(sSkelVerts, sSkelFaces, "bbox_texture", true);
                 }
             }
 
             if (viewport_bones)
             {
-                for (int i = 0; i < ikdata.bones.Count; i++)
+                for (int i = 0; i < IkData.Bones.Count; i++)
                 {
                     float bbox_size = 0.024f;
                     BBox bone_box = new BBox();
-                    bone_box.min = new float[3] { -bbox_size / 2, -bbox_size / 2, -bbox_size / 2 };
-                    bone_box.max = new float[3] { bbox_size / 2, bbox_size / 2, bbox_size / 2 };
+                    bone_box.Min = new float[3] { -bbox_size / 2, -bbox_size / 2, -bbox_size / 2 };
+                    bone_box.Max = new float[3] { bbox_size / 2, bbox_size / 2, bbox_size / 2 };
 
-                    bone_box.min = FVec.Add(bone_box.min, ikdata.bones[i].render_transform);
-                    bone_box.max = FVec.Add(bone_box.max, ikdata.bones[i].render_transform);
+                    bone_box.Min = FVec.Add(bone_box.Min, IkData.Bones[i].RenderTransform);
+                    bone_box.Max = FVec.Add(bone_box.Max, IkData.Bones[i].RenderTransform);
 
                     sSkelVerts.Clear();
                     sSkelFaces.Clear();
                     sSkelVerts.AddRange(bone_box.GetVisualVerts());
                     sSkelFaces.AddRange(bone_box.GetVisualFaces(sSkelVerts));
-                    WriteMesh(sSkelVerts, sSkelFaces, bonedata.bones[i].name, true);
+                    WriteMesh(sSkelVerts, sSkelFaces, BoneData.Bones[i].Name, true);
                 }
             }
 
@@ -1309,7 +1306,7 @@ namespace OgfTool
 
         private float[] SetupObjOffset(SSkelVert vert)
         {
-            if (!Header.IsStaticSingle() && ikdata != null && ikdata.chunk_version == 2)
+            if (!Header.IsStaticSingle() && IkData != null && IkData.ChunkVersion == 2)
                 return FixOldVertexOffset(vert);
 
             return vert.Offset();
@@ -1322,28 +1319,28 @@ namespace OgfTool
 
         private void TryRepairUserdata(UserData data)
         {
-            if (Header.format_version == 4 && data != null && data.old_format && MessageBox.Show("Userdata has old format, update?", "OGF Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                data.old_format = false;
+            if (Header.FormatVersion == 4 && data != null && data.OldFormat && MessageBox.Show("Userdata has old format, update?", "OGF Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                data.OldFormat = false;
         }
 
         public void RecalcBBox(bool recalc_childs)
         {
             if (Header == null)
-                Header = new OGF_Header();
+                Header = new OgfHeader();
 
-            Header.bb.Invalidate();
+            Header.BBox.Invalidate();
 
-            foreach (OGF_Child child in childs)
+            foreach (OgfChild child in Childs)
             {
                 if (!child.to_delete)
                 {
                     if (recalc_childs)
                         child.RecalcBBox();
-                    Header.bb.Merge(child.Header.bb);
+                    Header.BBox.Merge(child.Header.BBox);
                 }
             }
 
-            Header.bs.CreateSphere(Header.bb);
+            Header.BSphere.CreateSphere(Header.BBox);
         }
 
         public void AddBone(string name, string parent_bone, int pos)
@@ -1356,42 +1353,42 @@ namespace OgfTool
                     obb.Add(0);
 
                 Bone bone = new Bone();
-                bone.name = name;
-                bone.parent_name = parent_bone;
-                bone.fobb = obb.ToArray();
+                bone.Name = name;
+                bone.ParentName = parent_bone;
+                bone.Fobb = obb.ToArray();
 
-                bonedata.bones.Insert(pos, bone);
+                BoneData.Bones.Insert(pos, bone);
 
-                if (ikdata != null)
+                if (IkData != null)
                 {
-                    IK_Bone ikbone = new IK_Bone();
-                    int ImportBytes = ((ikdata.chunk_version == 4) ? 76 : ((ikdata.chunk_version == 3) ? 72 : 60));
+                    IKBone ikbone = new IKBone();
+                    int ImportBytes = ((IkData.ChunkVersion == 4) ? 76 : ((IkData.ChunkVersion == 3) ? 72 : 60));
 
                     // Create null Bone Shape
                     List<byte> shape = new List<byte>();
                     for (int i = 0; i < 112 + ImportBytes; i++)
                         shape.Add(0);
 
-                    if (ikdata.chunk_version == 4)
-                        ikbone.version = 1;
+                    if (IkData.ChunkVersion == 4)
+                        ikbone.Version = 1;
 
-                    ikbone.material = "default_object";
-                    ikbone.kinematic_data = shape.ToArray();
-                    ikbone.rotation = new float[3];
-                    ikbone.position = new float[3];
-                    ikbone.mass = 10.0f;
-                    ikbone.center_mass = new float[3];
+                    ikbone.Material = "default_object";
+                    ikbone.KinematicData = shape.ToArray();
+                    ikbone.Rotation = new float[3];
+                    ikbone.Position = new float[3];
+                    ikbone.Mass = 10.0f;
+                    ikbone.CenterMass = new float[3];
 
-                    ikdata.bones.Insert(pos, ikbone);
+                    IkData.Bones.Insert(pos, ikbone);
                 }
             }
         }
 
         public void RemoveBone(string bone)
         {
-            if (Opened && Header.IsSkeleton() && bonedata != null)
+            if (Opened && Header.IsSkeleton() && BoneData != null)
             {
-                RemoveBone(bonedata.GetBoneID(bone));
+                RemoveBone(BoneData.GetBoneID(bone));
             }
         }
 
@@ -1399,10 +1396,10 @@ namespace OgfTool
         {
             if (Opened && Header.IsSkeleton())
             {
-                bonedata.RemoveBone(bone);
+                BoneData.RemoveBone(bone);
 
-                if (ikdata != null)
-                    ikdata.RemoveBone(bone);
+                if (IkData != null)
+                    IkData.RemoveBone(bone);
             }
         }
 
@@ -1410,10 +1407,10 @@ namespace OgfTool
         {
             if (Opened && Header.IsSkeleton())
             {
-                for (int i = 0; i < bonedata.bones.Count; i++)
+                for (int i = 0; i < BoneData.Bones.Count; i++)
                 {
-                    if (bonedata.bones[i].parent_name == old)
-                        bonedata.bones[i].parent_name = _new;
+                    if (BoneData.Bones[i].ParentName == old)
+                        BoneData.Bones[i].ParentName = _new;
                 }
             }
         }
@@ -1422,9 +1419,9 @@ namespace OgfTool
         {
             if (Opened)
             {
-                if (Header.format_version != 4)
+                if (Header.FormatVersion != 4)
                 {
-                    MessageBox.Show("Can't convert model. Unsupported OGF version: " + Header.format_version.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Can't convert model. Unsupported OGF version: " + Header.FormatVersion.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -1432,10 +1429,10 @@ namespace OgfTool
 
                 if (IsCopModel)
                 {
-                    if (motion_refs != null)
-                        motion_refs.soc = false;
+                    if (MotionRefs != null)
+                        MotionRefs.Soc = false;
 
-                    foreach (var ch in childs)
+                    foreach (var ch in Childs)
                     {
                         if (ch.links >= 0x12071980)
                             ch.links /= 0x12071980;
@@ -1445,7 +1442,7 @@ namespace OgfTool
                 {
                     uint links = 0;
 
-                    foreach (var ch in childs)
+                    foreach (var ch in Childs)
                         links = Math.Max(links, ch.LinksCount());
 
                     if (links > 2 && MessageBox.Show("Model has more than 2 links. After converting to SoC model will lose influence data, continue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
@@ -1454,15 +1451,15 @@ namespace OgfTool
                         return;
                     }
 
-                    foreach (var ch in childs)
+                    foreach (var ch in Childs)
                     {
                         if (ch.LinksCount() > 2)
                             ch.SetLinks(1);
                     }
 
-                    if (motions.Anims != null)
+                    if (Motions.Anims != null)
                     {
-                        foreach (var Anim in motions.Anims)
+                        foreach (var Anim in Motions.Anims)
                         {
                             bool key16bit = (Anim.flags & (int)MotionKeyFlags.flTKey16IsBit) == (int)MotionKeyFlags.flTKey16IsBit;
                             bool keynocompressbit = (Anim.flags & (int)MotionKeyFlags.flTKeyFFT_Bit) == (int)MotionKeyFlags.flTKeyFFT_Bit;
@@ -1470,16 +1467,16 @@ namespace OgfTool
                             if (key16bit || keynocompressbit)
                             {
                                 if (MessageBox.Show("Build-in motions are in " + (keynocompressbit ? "no compression" : "16 bit compression") + " format, not supported in SoC. Delete motions?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
-                                    motions.SetData(null);
+                                    Motions.SetData(null);
                                 break;
                             }
                         }
                     }
 
-                    if (motion_refs != null)
-                        motion_refs.soc = true;
+                    if (MotionRefs != null)
+                        MotionRefs.Soc = true;
 
-                    foreach (var ch in childs)
+                    foreach (var ch in Childs)
                     {
                         if (ch.links < 0x12071980)
                             ch.links *= 0x12071980;

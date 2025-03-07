@@ -202,28 +202,32 @@ namespace OgfTool
         {
             BoxTextChanged(sender, e);
 
-            if (Path.GetExtension(FSLtxPath.Text) == ".ltx" && File.Exists(FSLtxPath.Text))
+            if (Path.GetExtension(FSLtxPath.Text) != ".ltx" || !File.Exists(FSLtxPath.Text))
             {
-                string FileName = FSLtxPath.Text;
+                return;
+            }
 
-                if (GetFSPath(FileName, "$game_data$") != null)
-                {
-                    string gamedata_path = FileName.Substring(0, FileName.LastIndexOf('\\')) + "\\" + GetFSPath(FileName, "$game_data$");
+            string FileName = FSLtxPath.Text;
 
-                    if (File.Exists(gamedata_path + "gamemtl.xr"))
-                    {
-                        GameMtlPath.Text = gamedata_path + "gamemtl.xr";
-                    }
+            if (GetFSPath(FileName, "$game_data$") == null)
+            {
+                return;
+            }
 
-                    if (GetFSPath(FileName, "$game_textures$") != null)
-                    {
-                        TexturesPath.Text = gamedata_path + GetFSPath(FileName, "$game_textures$");
+            string gamedata_path = FileName.Substring(0, FileName.LastIndexOf('\\')) + "\\" + GetFSPath(FileName, "$game_data$");
 
-                        int slash_idx = TexturesPath.Text.LastIndexOf('\\');
-                        if (slash_idx == TexturesPath.Text.Count() - 1)
-                            TexturesPath.Text = TexturesPath.Text.Substring(0, TexturesPath.Text.LastIndexOf('\\'));
-                    }
-                }
+            if (File.Exists(gamedata_path + "gamemtl.xr"))
+            {
+                GameMtlPath.Text = gamedata_path + "gamemtl.xr";
+            }
+
+            if (GetFSPath(FileName, "$game_textures$") != null)
+            {
+                TexturesPath.Text = gamedata_path + GetFSPath(FileName, "$game_textures$");
+
+                int slash_idx = TexturesPath.Text.LastIndexOf('\\');
+                if (slash_idx == TexturesPath.Text.Count() - 1)
+                    TexturesPath.Text = TexturesPath.Text.Substring(0, TexturesPath.Text.LastIndexOf('\\'));
             }
         }
 

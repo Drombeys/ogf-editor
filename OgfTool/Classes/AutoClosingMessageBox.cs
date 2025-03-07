@@ -5,8 +5,9 @@ namespace OgfTool
 {
     public class AutoClosingMessageBox
     {
-        System.Threading.Timer _timeoutTimer;
-        string _caption;
+        private System.Threading.Timer _timeoutTimer;
+        private readonly string _caption;
+
         AutoClosingMessageBox(string text, string caption, int timeout, MessageBoxIcon icon = 0)
         {
             _caption = caption;
